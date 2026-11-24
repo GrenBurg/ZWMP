@@ -1,0 +1,959 @@
+<title>Zendweg Multiplayer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Share+Tech+Mono&display=swap">
+<style>
+/* Layout: zendweg-scoop over de volle breedte, daaronder twee modempanelen naast elkaar (grondstation | CCT200), elk met Transmit en Receive. Bewust één donker scope-thema, gelijk aan SHF Modulation Lab. */
+:root{
+  --bg:#0a1013; --panel:#10191d; --panel2:#0d1518; --grid:#1c2b31; --rule:#24363d;
+  --fg:#d4e2e4; --muted:#7a9197; --trace:#ffb547;
+  --out:#ff6b5e; --in:#5fa8ff; --ok:#6fd49a; --bad:#ff6b5e; --ledoff:#1a272c;
+  --tan:#b9a57c; --metal:#c3ced1; --wire:#5fd0e6;
+  --f-display:"Saira Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 28px}
+.app{display:flex;flex-direction:column;gap:14px;max-width:1500px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 24px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,3vw,38px);letter-spacing:.02em;margin:0;line-height:1;text-wrap:balance}
+h1 span{color:var(--trace)}
+h1 .ver{font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:3px;padding:2px 6px;vertical-align:middle;letter-spacing:0}
+.sub{color:var(--muted);margin:0;max-width:72ch;line-height:1.45}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;min-width:0}
+.lbl{font-family:var(--f-display);font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.btn{background:transparent;color:var(--fg);border:1px solid var(--rule);border-radius:5px;padding:6px 12px;font-family:var(--f-body);font-size:13px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.reset{border-color:#5a3a35;color:#ffb3aa}
+.btn.reset:hover{border-color:var(--bad)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--trace);outline-offset:2px}
+.chk{display:inline-flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:13px;color:var(--fg);cursor:pointer}
+.chk input{accent-color:var(--trace)}
+.zwctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+/* zendweg */
+.zw{position:relative;width:100%;max-width:100%;aspect-ratio:1000/510;background:var(--panel2);border-radius:4px;overflow:hidden}
+.zw canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.tp{position:absolute;left:50%;top:10px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:rgba(13,21,24,.85);border:1px solid var(--rule);border-radius:5px;padding:4px 6px 4px 10px;white-space:nowrap}
+.tp span{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:var(--muted)}
+select{font:500 13px var(--f-mono);background:var(--panel2);color:var(--fg);border:1px solid var(--rule);border-radius:4px;padding:5px 6px;max-width:100%}
+select option:disabled{color:#4a5a60}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:8px;font:600 12px var(--f-display);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--rule);border-radius:999px;padding:3px 12px 3px 8px;color:var(--muted)}
+.chip i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.chip b{font-weight:600}
+.chip.ok b{color:var(--ok)}.chip.warn b{color:var(--trace)}.chip.bad b{color:var(--bad)}
+
+/* modems */
+.units{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:1150px){.units{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.unit{display:flex;flex-direction:column;gap:12px}
+.uhead{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.uhead h2{font-family:var(--f-display);font-weight:700;font-size:24px;letter-spacing:.02em;margin:0;line-height:1}
+.uhead .dev{color:var(--muted);font-size:12px;margin-top:3px}
+.uhead .tag{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:8px;vertical-align:2px}
+.leds{display:flex;gap:16px;flex-wrap:wrap}
+.ledgrp{display:grid;grid-template-columns:auto auto;gap:3px 12px;align-items:center}
+.ledgrp b{grid-column:1/-1;font:500 10px var(--f-display);letter-spacing:.16em;color:var(--muted)}
+.led{display:flex;gap:6px;align-items:center;font:500 10.5px var(--f-mono);color:var(--muted);white-space:nowrap}
+.led::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--ledoff);box-shadow:inset 0 0 0 1px #2c3f45;flex:none}
+.led.on{color:var(--fg)}
+.led.g.on::before{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.led.r.on::before{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+.led.a.on::before{background:var(--trace);box-shadow:0 0 8px var(--trace)}
+.txrx{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:12px}
+fieldset{border:1px solid var(--rule);border-radius:5px;background:var(--panel2);margin:0;padding:8px 12px 12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+legend{font:600 13px var(--f-display);letter-spacing:.14em;text-transform:uppercase;padding:0 6px;color:var(--fg)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:10px 12px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f.wide{grid-column:1/-1}
+.fl{font:500 11px var(--f-display);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.inp{display:flex;align-items:stretch;border:1px solid var(--rule);border-radius:4px;background:var(--bg);overflow:hidden}
+.inp input{flex:1;min-width:0;width:100%;background:transparent;border:0;color:var(--trace);font:600 15px var(--f-mono);padding:6px 8px;font-variant-numeric:tabular-nums}
+.inp input:focus-visible{outline:none}
+.inp:focus-within{border-color:var(--trace)}
+.inp i{font:500 11px var(--f-mono);font-style:normal;color:var(--muted);padding:0 8px;display:flex;align-items:center;border-left:1px solid var(--rule)}
+.f small{color:var(--muted);font-size:11px}
+.f.dis{opacity:.38;pointer-events:none}
+.flow{display:flex;flex-wrap:wrap;gap:6px}
+.flow button{background:var(--bg);color:var(--fg);border:1px solid var(--rule);border-radius:4px;font:600 13px var(--f-mono);padding:6px 14px;cursor:pointer}
+.flow button:disabled{opacity:.35;cursor:not-allowed}
+.flow button[aria-pressed=true]{background:var(--trace);color:#0a1013;border-color:var(--trace);opacity:1}
+.flow button.pend{border-color:var(--trace);color:var(--trace)}
+.flow button.abort:not(:disabled){border-color:#5a3a35;color:#ffb3aa}
+.flow button.confirm{background:var(--ok);color:#0a1013;border-color:var(--ok);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 4px rgba(111,212,154,.25)}}
+@media (prefers-reduced-motion: reduce){.flow button.confirm{animation:none}}
+.f select{width:100%}
+.f select.bad,.inp.bad{border-color:var(--bad)}
+.seg{display:flex;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.seg button{flex:1;background:var(--bg);color:var(--muted);border:0;font:600 13px var(--f-mono);padding:6px 8px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed=true]{background:var(--trace);color:#0a1013}
+.seg button.off[aria-pressed=true]{background:#33454b;color:var(--fg)}
+.msg{font-size:12.5px;line-height:1.4;min-height:1.4em;margin:0;color:var(--muted)}
+.msg.bad{color:var(--bad)}.msg.warn{color:var(--trace)}
+.ro{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;padding-top:8px;border-top:1px solid var(--rule)}
+.ro dt{color:var(--muted);font-size:12.5px}
+.ro dd{margin:0;text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:13px}
+.pill{display:inline-block;font:600 11px var(--f-display);letter-spacing:.1em;padding:1px 8px;border-radius:3px}
+.pill.ok{background:rgba(111,212,154,.15);color:var(--ok)}
+.pill.warn{background:rgba(255,181,71,.15);color:var(--trace)}
+.pill.bad{background:rgba(255,107,94,.15);color:var(--bad)}
+.info{font-size:12px;color:var(--muted);margin:0}
+.info b{color:var(--fg);font-weight:500;font-family:var(--f-mono)}
+.sa{display:flex;flex-direction:column;gap:8px}
+.sahead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.seg.small button{font-size:11px;padding:4px 8px;flex:0 0 auto}
+.spec{position:relative;height:190px;background:var(--bg);border:1px solid var(--rule);border-radius:4px}
+.spec canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.foot{color:var(--muted);font-size:12px;line-height:1.55;margin:0;max-width:130ch}
+@media (max-width:640px){.tp{top:6px;padding:3px 4px 3px 8px}.tp span{display:none}select{font-size:12px}}
+
+/* ---------- multiplayer ---------- */
+.mpbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.rolechip{font-size:12px;letter-spacing:.08em;border:1px solid var(--rule);border-radius:4px;padding:4px 10px;color:var(--fg)}
+#mpConn{font-size:12px;padding:4px 10px}
+.peer{display:none;flex-direction:column;gap:12px;align-items:flex-start}
+.peer h2{font-family:var(--f-display);font-weight:700;font-size:24px;margin:0;line-height:1}
+.peer p{margin:0;color:var(--muted);line-height:1.5;max-width:46ch}
+.peer .big{font:600 13px var(--f-mono);letter-spacing:.06em}
+body.role-as .u-cct,body.role-cct .u-as,body.role-cct .p-sa{display:none}
+body.role-as .peer,body.role-cct .peer{display:flex}
+body.role-cct .peer{order:-1}
+dialog.mp{background:var(--panel);color:var(--fg);border:1px solid var(--rule);border-radius:8px;padding:0;width:min(760px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto}
+dialog.mp::backdrop{background:rgba(4,8,10,.78)}
+.mpin{padding:20px 22px;display:flex;flex-direction:column;gap:16px}
+.mpin h2{font-family:var(--f-display);font-weight:700;font-size:28px;margin:0;line-height:1.05;text-wrap:balance}
+.mpin h2 span{color:var(--trace)}
+.mpin p{margin:0;color:var(--muted);line-height:1.5}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px}
+.role{background:var(--panel2);border:1px solid var(--rule);border-radius:6px;padding:14px;text-align:left;color:var(--fg);cursor:pointer;display:flex;flex-direction:column;gap:6px;font:inherit}
+.role:hover{border-color:var(--trace)}
+.role b{font-family:var(--f-display);font-size:20px;letter-spacing:.02em}
+.role span{color:var(--muted);font-size:13px;line-height:1.45}
+.role .tag{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:8px}
+.step{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--rule);padding-top:14px}
+.step .fl{font-size:12px}
+.code{width:100%;min-height:92px;resize:vertical;background:var(--bg);color:var(--trace);border:1px solid var(--rule);border-radius:4px;padding:8px;font:500 12.5px var(--f-mono);line-height:1.45;word-break:break-all}
+.code:focus-visible{outline:2px solid var(--trace);outline-offset:1px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn.go{background:var(--trace);color:#0a1013;border-color:var(--trace);font-weight:600}
+.btn.go:disabled{opacity:.4;cursor:not-allowed}
+.mpst{font-size:13px;min-height:1.4em;margin:0}
+.mpst.ok{color:var(--ok)}.mpst.bad{color:var(--bad)}.mpst.warn{color:var(--trace)}
+.small{font-size:12px;color:var(--muted)}
+/* één scherm op grote monitoren (2560×1440): grondstation | zendweg + SA | CCT200 */
+@media (min-width:1800px) and (min-height:1000px){
+  html,body{height:100%}
+  body{padding-block:14px;overflow:hidden}
+  .app{max-width:none;height:100%;display:grid;gap:14px;
+    grid-template-columns:minmax(0,1fr) minmax(0,1.85fr) minmax(0,1fr);
+    grid-template-rows:auto auto auto minmax(0,1fr);
+    grid-template-areas:"head head head" "as zw cct" "as sa cct" "as foot cct"}
+  header{grid-area:head}
+  .p-zw{grid-area:zw}.p-sa{grid-area:sa}.foot{grid-area:foot;align-self:start}
+  .units{display:contents}
+  .u-as{grid-area:as;overflow:auto}.u-cct{grid-area:cct;overflow:auto}
+  .txrx{grid-template-columns:minmax(0,1fr)}
+  .fgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .spec{height:200px}
+  body.role-as .peer{grid-area:cct}
+  body.role-cct .peer{grid-area:as}
+  body.role-cct .app{grid-template-areas:"head head head" "as zw cct" "as foot cct" "as foot cct"}
+}
+</style>
+
+<div class="app">
+  <header>
+    <h1>Zendweg <span>Multiplayer</span> <small class="ver mono">v1.0</small></h1>
+    <div class="mpbar">
+      <span class="rolechip mono" id="mpRole">ROL · —</span>
+      <span class="pill" id="mpConn">NIET GEKOPPELD</span>
+      <button class="btn" id="mpOpen" type="button">Koppelen</button>
+    </div>
+  </header>
+
+  <section class="panel p-zw" aria-label="Zendweg">
+    <div class="lbl"><span>Zendweg · SES-4 Ku</span>
+      <div class="zwctl">
+        <label class="chk"><input type="checkbox" id="cause" checked> Toon foutoorzaak</label>
+        <button class="btn" id="pause" type="button">Pauze</button>
+      </div>
+    </div>
+    <div class="zw">
+      <canvas id="cZw" aria-label="Geanimeerde zendweg tussen grondstation, SES-4 en CCT200"></canvas>
+      <label class="tp" for="tp"><span>Transponder</span>
+        <select id="tp"><option value="EUV05">EUV05 · translatie 2790 MHz</option><option value="EUV09">EUV09 · translatie 1248 MHz</option></select>
+      </label>
+    </div>
+    <div class="chips">
+      <span class="chip" id="chipOut"><i style="background:var(--out)"></i>Outbound <b>—</b></span>
+      <span class="chip" id="chipIn"><i style="background:var(--in)"></i>Inbound <b>—</b></span>
+    </div>
+  </section>
+
+  <section class="panel sa p-sa" aria-label="Spectrum analyzer">
+    <div class="sahead"><span class="lbl" style="margin:0">Spectrum analyzer · grondstation, achter de LNB</span>
+      <div class="seg small" role="group" aria-label="Span" id="saSpan"><button type="button" data-v="1">1 MHz</button><button type="button" data-v="5">5 MHz</button><button type="button" data-v="10">10 MHz</button><button type="button" data-v="20">20 MHz</button><button type="button" data-v="50">50 MHz</button><button type="button" data-v="100">100 MHz</button></div></div>
+    <div class="spec"><canvas id="as-spec" aria-label="Spectrum analyzer, center op de downlink van de remote"></canvas></div>
+    <p class="info" id="saInfo"></p>
+  </section>
+  <div class="units" id="units"></div>
+
+  <p class="foot">Frequentieplan: de uplink van het grondstation is de Tx L-band plus de BUC-LO van 12.800 MHz (BUC-band 13.750–14.500 MHz). De satelliet verlaagt met de translatie van de gekozen transponder. De LNB in het grondstation zet de downlink om met LO 10.000 MHz (Ku laag, 10.700–11.700 MHz) of 10.750 MHz (Ku hoog, 11.700–12.750 MHz) en heeft een vaste drift van +2,7 kHz; de CCT200 rekent zelf om en heeft −1,4 kHz drift. De demod lockt als de carrier binnen het vaste zoekbereik van ±30 kHz valt en modulatie, FEC en data rate gelijk zijn. Beide ontvangers zien ook hun eigen carrier terug (loopback). De spectrum analyzer staat in het grondstation achter de LNB en toont de Ku-frequentie; de center volgt de downlink van de CCT200 en de gele markering is de afstemming van de demod, teruggerekend naar Ku. Modcods, data-ratebereiken en Eb/No-drempels komen uit het DMD2050E-datasheet (gegarandeerde Eb/No bij BER 10⁻⁷); 8PSK LDPC staat daar niet in de prestatietabel en is geschat. Onder de drempel lockt de demod met bitfouten, ruim 1 dB eronder niet meer. De Eb/No zelf is een indicatief model met een vaste linkwinst per richting en overdrive boven −10 dBm modemuitgang. Symbol rate = data rate / bandbreedte-efficiëntie, bezette bandbreedte met roll-off 0,35. Het grondstation kan in CW (ongemoduleerd) zenden: een zuivere draaggolf zonder data, die op de spectrum analyzer als smalle lijn verschijnt. Data rate, modulatie en FEC doen dan niet mee en geen demod lockt. De CCT200 start altijd in CW: CW → Confirm zet een draaggolf aan, Modulate → Confirm schakelt over op data, Abort stopt het zenden. Reset zet de sim-standaardwaarden (Tx mode normaal, carrier uit, −25 dBm). Multiplayer: elke speler stuurt alleen de instellingen van zijn eigen modem, en beide schermen rekenen daarmee dezelfde link door. Het grondstation kiest de transponder. Valt de verbinding weg, dan stopt de carrier van de andere kant. De koppeling is een directe, versleutelde WebRTC-verbinding tussen de browsers; over het internet vraagt elke browser eenmalig zijn publieke adres op bij een publieke STUN-server, op één netwerk is dat niet nodig.</p>
+</div>
+
+<dialog class="mp" id="mp" aria-labelledby="mpTitle">
+  <div class="mpin">
+    <section id="stRole" class="mpsec">
+      <h2 id="mpTitle">Zendweg <span>Multiplayer</span></h2>
+      <p>Eén speler bedient het grondstation, de ander de CCT200 in het veld. Jullie koppelen door twee keer een code uit te wisselen, via chat, mail of Teams. Daarna praten de browsers direct met elkaar.</p>
+      <div class="roles">
+        <button class="role" type="button" data-role="as"><b><i class="tag" style="background:var(--out)"></i>Grondstation</b><span>DMD2050E, spectrum analyzer en de keuze van de transponder. Jij start de sessie.</span></button>
+        <button class="role" type="button" data-role="cct"><b><i class="tag" style="background:var(--in)"></i>CCT200</b><span>De veldterminal. Je krijgt een sessiecode van het grondstation.</span></button>
+        <button class="role" type="button" data-role="solo"><b><i class="tag" style="background:var(--muted)"></i>Solo</b><span>Beide kanten op één scherm, zonder koppeling.</span></button>
+      </div>
+    </section>
+
+    <section id="stHost" class="mpsec" hidden>
+      <h2>Grondstation · <span>sessie starten</span></h2>
+      <div class="step">
+        <span class="fl">1 · Sessiecode voor de CCT200</span>
+        <div class="row"><button class="btn go" id="hMake" type="button">Maak sessiecode</button><span class="small" id="hLen"></span></div>
+        <textarea class="code" id="hOffer" readonly placeholder="De sessiecode verschijnt hier." aria-label="Sessiecode"></textarea>
+        <div class="row"><button class="btn" id="hCopy" type="button" disabled>Kopieer sessiecode</button><span class="small">Stuur deze code naar de CCT200-speler.</span></div>
+      </div>
+      <div class="step">
+        <span class="fl">2 · Antwoordcode van de CCT200</span>
+        <textarea class="code" id="hAnswer" placeholder="Plak hier de antwoordcode die je terugkrijgt." aria-label="Antwoordcode"></textarea>
+        <div class="row"><button class="btn go" id="hConnect" type="button" disabled>Verbinden</button></div>
+      </div>
+      <p class="mpst" id="hSt" role="status"></p>
+      <div class="row"><button class="btn" type="button" data-back>Andere rol kiezen</button><button class="btn" type="button" data-close>Ongekoppeld verder</button></div>
+    </section>
+
+    <section id="stJoin" class="mpsec" hidden>
+      <h2>CCT200 · <span>meedoen</span></h2>
+      <div class="step">
+        <span class="fl">1 · Sessiecode van het grondstation</span>
+        <textarea class="code" id="jOffer" placeholder="Plak hier de sessiecode die je van het grondstation krijgt." aria-label="Sessiecode"></textarea>
+        <div class="row"><button class="btn go" id="jMake" type="button">Maak antwoordcode</button></div>
+      </div>
+      <div class="step">
+        <span class="fl">2 · Antwoordcode voor het grondstation</span>
+        <textarea class="code" id="jAnswer" readonly placeholder="De antwoordcode verschijnt hier." aria-label="Antwoordcode"></textarea>
+        <div class="row"><button class="btn" id="jCopy" type="button" disabled>Kopieer antwoordcode</button><span class="small" id="jLen">Stuur deze code terug naar het grondstation.</span></div>
+      </div>
+      <p class="mpst" id="jSt" role="status"></p>
+      <div class="row"><button class="btn" type="button" data-back>Andere rol kiezen</button><button class="btn" type="button" data-close>Ongekoppeld verder</button></div>
+    </section>
+
+    <section id="stOn" class="mpsec" hidden>
+      <h2>Gekoppeld</h2>
+      <p id="onTxt"></p>
+      <div class="row"><button class="btn go" type="button" data-close>Naar de sim</button><button class="btn" id="mpDrop" type="button">Verbinding verbreken</button></div>
+    </section>
+  </div>
+</dialog>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const BUC_LO=12800, BUC_MIN=13750, BUC_MAX=14500, KU_DL_MIN=10700, KU_DL_MAX=12750;
+const TP={EUV05:2790, EUV09:1248};
+const LNB={low:{lo:10000,min:10700,max:11700},high:{lo:10750,min:11700,max:12750}};
+const DRIFT={as:0.0027, cct:-0.0014};           // MHz
+const KLINK={as:{as:100,cct:95}, cct:{as:92,cct:86}}; // dBHz bij 0 dBm, [zender][ontvanger]
+const MODS=['BPSK','QPSK','8PSK','16QAM','OQPSK','8QAM'];
+const FECS={TPC:['5/16','21/44','3/4','7/8'], LDPC:['1/2','2/3','3/4']};
+// mod, fec, bw-eff (bit/sym), Eb/No gegarandeerd @1e-7, min kbps, max kbps, geschat
+const ROWS=[
+ ['BPSK','TPC 5/16',0.31,2.9,2.4,3125],['BPSK','TPC 21/44',0.48,3.1,2.4,4773],
+ ['QPSK','TPC 21/44',0.95,3.1,4.3,9545],['QPSK','TPC 3/4',1.50,4.1,6.7,15000],['QPSK','TPC 7/8',1.75,4.4,7.8,17500],
+ ['8PSK','TPC 3/4',2.25,6.5,10,20000],['8PSK','TPC 7/8',2.63,7.1,11.6,20000],
+ ['16QAM','TPC 3/4',3.00,7.8,13.3,20000],['16QAM','TPC 7/8',3.50,8.2,15.5,20000],
+ ['BPSK','LDPC 1/2',0.50,2.2,2.4,14100],
+ ['QPSK','LDPC 1/2',1.00,2.2,4.8,20000],['QPSK','LDPC 2/3',1.33,2.5,6.4,20000],['QPSK','LDPC 3/4',1.50,3.2,7.2,20000],
+ ['8PSK','LDPC 2/3',2.00,5.3,9.6,20000,1],['8PSK','LDPC 3/4',2.25,6.3,10.8,20000,1],
+ ['8QAM','LDPC 2/3',2.00,4.8,9.6,20000],['8QAM','LDPC 3/4',2.25,5.8,10.8,20000],
+ ['16QAM','LDPC 3/4',3.00,7.0,14.4,20000]
+];
+const MC={};
+for(const r of ROWS){const o={mod:r[0],fec:r[1],bw:r[2],eb:r[3],min:r[4],max:r[5],est:!!r[6]};MC[r[0]+'|'+r[1]]=o;
+  if(r[0]==='QPSK')MC['OQPSK|'+r[1]]=Object.assign({},o,{mod:'OQPSK'});}
+const mcOf=(m,f)=>MC[m+'|'+f]||null;
+
+const DEF=u=>({
+  tx:{on:false,mode:'mod',pending:null,pwr:-25,f:u==='as'?1000:14000,rate:64,mod:'QPSK',fec:'TPC 3/4'},
+  rx:{f:u==='as'?1000:11000,rate:64,mod:'QPSK',fec:'TPC 3/4',acq:30,lnb:'low'}
+});
+const S={tp:'EUV05',cause:true,as:DEF('as'),cct:DEF('cct')};
+const UNIT={
+  as:{name:'Grondstation',dev:'DMD2050E · L-band',color:'var(--out)',
+      tx:{min:950,max:2000,hint:'L-band 950–2000 MHz'},rx:{min:950,max:2000,hint:'L-band 950–2000 MHz'},
+      txInfo:'BUC LO <b>12.800 MHz</b>'},
+  cct:{name:'CCT200',dev:'Remote veldterminal · Ku',color:'var(--in)',
+      tx:{min:13750,max:14500,hint:'Ku 13.750–14.500 MHz'},rx:{min:10700,max:12750,hint:'Ku 10.700–12.750 MHz'},
+      txInfo:'De CCT200 rekent zijn LO zelf om: vul de Ku-frequentie in.'}
+};
+const NUM={ // side-key: label, unit, decimals, range
+  'tx-pwr':{l:'Transmit power',u:'dBm',d:1,min:-40,max:0},
+  'tx-f':{l:'Frequency',u:'MHz',d:3},
+  'tx-rate':{l:'Data rate',u:'kbps',d:3,min:2.4,max:52000},
+  'rx-f':{l:'Frequency',u:'MHz',d:3},
+  'rx-rate':{l:'Data rate',u:'kbps',d:3,min:2.4,max:52000},
+};
+const range=(u,k)=>{const n=NUM[k];if(n.min!==undefined)return n;const s=UNIT[u][k.slice(0,2)];return {min:s.min,max:s.max}};
+
+/* ---------- UI opbouw ---------- */
+const fecSel=id=>`<select id="${id}"><option value="">— kies FEC —</option>${Object.entries(FECS).map(([g,rs])=>`<optgroup label="${g}">${rs.map(r=>`<option value="${g} ${r}">${g} ${r}</option>`).join('')}</optgroup>`).join('')}</select>`;
+const modSel=id=>`<select id="${id}">${MODS.map(m=>`<option value="${m}">${m}</option>`).join('')}</select>`;
+const num=(u,k,cls='')=>{const n=NUM[k],h=k.endsWith('-f')?UNIT[u][k.slice(0,2)].hint:(k==='tx-pwr'?'−40 tot 0 dBm':'');
+  return `<label class="f ${cls}" for="${u}-${k}"><span class="fl">${n.l}</span><span class="inp" id="${u}-${k}-box"><input id="${u}-${k}" inputmode="decimal" autocomplete="off" spellcheck="false"><i>${n.u}</i></span>${h?`<small>${h}</small>`:''}</label>`};
+function unitHTML(u){const U=UNIT[u];return `
+<section class="panel unit u-${u}" aria-label="${U.name}">
+  <div class="uhead">
+    <div><h2><span class="tag" style="background:${U.color}"></span>${U.name}</h2><div class="dev mono">${U.dev}</div></div>
+    <div class="leds">
+      <div class="ledgrp"><b>MOD</b><span class="led g" id="${u}-l-txon">TRANSMIT ON</span><span class="led r" id="${u}-l-mmaj">MAJOR ALARM</span><span class="led a" id="${u}-l-mmin">MINOR ALARM</span></div>
+      <div class="ledgrp"><b>DEMOD</b><span class="led g" id="${u}-l-lock">SIGNAL LOCK</span><span class="led r" id="${u}-l-dmaj">MAJOR ALARM</span><span class="led a" id="${u}-l-dmin">MINOR ALARM</span></div>
+    </div>
+    <button class="btn reset" id="${u}-reset" type="button">Reset modem</button>
+  </div>
+  <div class="txrx">
+    <fieldset><legend>Transmit</legend>
+      <div class="fgrid">
+        ${u==='as'?`<div class="f"><span class="fl">Carrier</span><div class="seg" role="group" aria-label="Carrier"><button type="button" class="off" id="as-tx-off">OFF</button><button type="button" id="as-tx-on">ON</button></div></div>`
+        :`<div class="f wide"><span class="fl">Transmit</span>
+          <div class="flow" role="group" aria-label="Transmit">
+            <button type="button" id="cct-b-cw">CW</button><button type="button" id="cct-b-mod">Modulate</button><button type="button" id="cct-b-abort" class="abort">Abort</button>
+            <button type="button" id="cct-b-ok" class="confirm" hidden>Confirm</button>
+          </div><small id="cct-flow-st"></small></div>`}
+        ${u==='as'?`<label class="f" for="as-tx-mode"><span class="fl">Tx mode</span><select id="as-tx-mode"><option value="mod">Normaal (gemoduleerd)</option><option value="cw">CW (ongemoduleerd)</option></select></label>`:''}
+        ${num(u,'tx-pwr')}
+        ${num(u,'tx-f')}
+        ${num(u,'tx-rate').replace('<label class="f "',`<label class="f" id="${u}-tx-rate-f"`)}
+        <label class="f" id="${u}-tx-mod-f" for="${u}-tx-mod"><span class="fl">Modulation</span>${modSel(u+'-tx-mod')}</label>
+        <label class="f" id="${u}-tx-fec-f" for="${u}-tx-fec"><span class="fl">Inner FEC</span>${fecSel(u+'-tx-fec')}</label>
+      </div>
+      <p class="msg" id="${u}-tx-msg" role="status"></p>
+      <dl class="ro">
+        <dt>Symbol rate</dt><dd id="${u}-tx-rs">—</dd>
+        <dt>Bezette bandbreedte</dt><dd id="${u}-tx-bw">—</dd>
+      </dl>
+      <p class="info">${U.txInfo}</p>
+    </fieldset>
+    <fieldset><legend>Receive</legend>
+      <div class="fgrid">
+        ${num(u,'rx-f')}
+        ${num(u,'rx-rate')}
+        <label class="f" for="${u}-rx-mod"><span class="fl">Modulation</span>${modSel(u+'-rx-mod')}</label>
+        <label class="f" for="${u}-rx-fec"><span class="fl">Inner FEC</span>${fecSel(u+'-rx-fec')}</label>
+        ${u==='as'?`<label class="f" for="as-rx-lnb"><span class="fl">LNB-band</span><select id="as-rx-lnb"><option value="low">Ku laag · LO 10.000</option><option value="high">Ku hoog · LO 10.750</option></select></label>`:''}
+      </div>
+      <p class="msg" id="${u}-rx-msg" role="status"></p>
+      <dl class="ro">
+        <dt>Demod</dt><dd><span class="pill bad" id="${u}-rx-st">GEEN LOCK</span></dd>
+        <dt>Eb/No</dt><dd id="${u}-rx-eb">—</dd>
+        <dt>Frequentie-offset</dt><dd id="${u}-rx-off">—</dd>
+      </dl>
+    </fieldset>
+  </div>
+</section>`}
+$('units').innerHTML=unitHTML('as')+unitHTML('cct')+`<section class="panel peer" id="peer" aria-live="polite">
+  <h2 id="peerName">—</h2><p class="big" id="peerSt">NIET GEKOPPELD</p><p id="peerTxt"></p>
+  <button class="btn" type="button" id="peerOpen">Koppelen</button></section>`;
+
+/* ---------- bediening ---------- */
+const msgT={};
+function flash(u,side,text){const el=$(`${u}-${side}-msg`);el.textContent=text;el.className='msg bad';
+  clearTimeout(msgT[u+side]);msgT[u+side]=setTimeout(()=>{msgT[u+side]=null;update()},4500);}
+function fill(u){const s=S[u];
+  for(const k in NUM){const [side,key]=k.split('-');$(`${u}-${k}`).value=s[side][key].toFixed(NUM[k].d);}
+  for(const side of ['tx','rx']){$(`${u}-${side}-mod`).value=s[side].mod;$(`${u}-${side}-fec`).value=s[side].fec;}
+  if(u==='as'){$('as-rx-lnb').value=s.rx.lnb;$('as-tx-mode').value=s.tx.mode;}}
+for(const u of ['as','cct']){
+  for(const k in NUM){const [side,key]=k.split('-'),el=$(`${u}-${k}`);
+    el.addEventListener('change',()=>{const v=parseFloat(el.value.replace(',','.').replace(/\s/g,''));const r=range(u,k),n=NUM[k];
+      if(!isFinite(v)||v<r.min||v>r.max){el.value=S[u][side][key].toFixed(n.d);
+        flash(u,side,`${n.l}: buiten bereik ${r.min}–${r.max} ${n.u.replace('± ','')}. Waarde niet overgenomen.`);return;}
+      S[u][side][key]=+v.toFixed(n.d);el.value=S[u][side][key].toFixed(n.d);update();});
+    el.addEventListener('keydown',e=>{if(e.key==='Enter')el.blur();});}
+  for(const side of ['tx','rx']){
+    $(`${u}-${side}-mod`).addEventListener('change',e=>{S[u][side].mod=e.target.value;
+      if(S[u][side].fec&&!mcOf(S[u][side].mod,S[u][side].fec)){S[u][side].fec='';}update();});
+    $(`${u}-${side}-fec`).addEventListener('change',e=>{S[u][side].fec=e.target.value;update();});}
+  $(`${u}-reset`).onclick=()=>{S[u]=DEF(u);fill(u);msgT[u+'tx']=msgT[u+'rx']=null;update()};
+}
+$('as-rx-lnb').onchange=e=>{S.as.rx.lnb=e.target.value;update()};
+$('as-tx-mode').onchange=e=>{S.as.tx.mode=e.target.value;update()};
+$('as-tx-on').onclick=()=>{S.as.tx.on=true;update()};
+$('as-tx-off').onclick=()=>{S.as.tx.on=false;update()};
+/* CCT200: altijd eerst CW, dan Modulate, elke stap met Confirm */
+$('cct-b-cw').onclick=()=>{S.cct.tx.pending=S.cct.tx.pending==='cw'?null:'cw';update()};
+$('cct-b-mod').onclick=()=>{S.cct.tx.pending=S.cct.tx.pending==='mod'?null:'mod';update()};
+$('cct-b-abort').onclick=()=>{const t=S.cct.tx;t.on=false;t.pending=null;update()};
+$('cct-b-ok').onclick=()=>{const t=S.cct.tx,p=t.pending;t.pending=null;
+  if(p==='cw'){t.on=true;t.mode='cw';}
+  else if(p==='mod')t.mode='mod';
+  update();};
+$('tp').onchange=e=>{S.tp=e.target.value;update()};
+$('cause').onchange=e=>{S.cause=e.target.checked};
+
+/* ---------- model ---------- */
+const effP=p=>p<=-10?p:-10-0.7*(p+10);
+function carrier(u){const t=S[u].tx,cw=t.mode==='cw',m=cw?null:mcOf(t.mod,t.fec);let err=null,short=null;
+  if(cw){}
+  else if(!t.fec){err='Kies een Inner FEC voor deze modulatie.';short='Tx-config ongeldig';}
+  else if(!m){err='Ongeldige modcod.';short='Tx-config ongeldig';}
+  else if(t.rate<m.min||t.rate>m.max){err=`Data rate buiten bereik voor ${t.mod} ${t.fec}: ${m.min}–${m.max} kbps.`;short='Data rate buiten modcod-bereik';}
+  const up=u==='as'?t.f+BUC_LO:t.f;
+  const bucErr=(u==='as'&&(up<BUC_MIN||up>BUC_MAX))?'Uplink valt buiten de BUC-band (13.750–14.500 MHz): geen uitzending.':null;
+  const dl=up-TP[S.tp];
+  const Rs=m?t.rate/m.bw:null;
+  return {u,cw,on:t.on,err,short,bucErr,tx:t.on&&!err&&!bucErr,up,dl,kuOk:dl>=KU_DL_MIN&&dl<=KU_DL_MAX,
+    m,mod:t.mod,fec:t.fec,rate:t.rate,pwr:t.pwr,Rs,occ:Rs?Rs*1.35:null,over:t.pwr>-10};}
+const ebno=(c,rx)=>KLINK[c.u][rx]+effP(c.pwr)-10*Math.log10(c.rate*1000);
+const cn0=(c,rx)=>KLINK[c.u][rx]+effP(c.pwr);
+function evalPair(rxU,c){const r=S[rxU].rx;
+  if(!c.tx)return {st:'nocarrier'};
+  if(!c.kuOk)return {st:'lost'};
+  let f;
+  if(rxU==='as'){const L=LNB[r.lnb];if(c.dl<L.min||c.dl>L.max)return {st:'lnb'};f=c.dl-L.lo+DRIFT.as;}
+  else f=c.dl+DRIFT.cct;
+  if(c.cw)return {st:'cw',f,c,off:(f-r.f)*1000};
+  const off=(f-r.f)*1000,e=ebno(c,rxU);
+  if(Math.abs(off)>r.acq)return {st:'freq',f,e,c};
+  if(!mcOf(r.mod,r.fec))return {st:'rxcfg',f,e,c};
+  if(r.mod!==c.mod||r.fec!==c.fec)return {st:'modcod',f,e,c};
+  if(Math.abs(r.rate-c.rate)>0.0005)return {st:'rate',f,e,c};
+  const th=c.m.eb;
+  if(e<th-1)return {st:'ebno',f,e,off,th,c};
+  return {st:e<th?'errors':'lock',f,e,off,th,c};}
+const isLock=p=>p.st==='lock'||p.st==='errors';
+const WHY={nocarrier:'Geen carrier',lost:'Downlink buiten Ku-band',lnb:'Downlink buiten gekozen LNB-band',freq:'Carrier buiten zoekbereik',
+  rxcfg:'Rx-config ongeldig',modcod:'Modulatie/FEC verschilt',rate:'Data rate verschilt',ebno:'Eb/No te laag voor lock',cw:'CW · geen data',errors:'Lock met bitfouten',lock:'Lock'};
+
+let R=null;const startT={as:-1e9,cct:-1e9},sig={as:'',cct:''};
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function compute(){
+  const car={as:carrier('as'),cct:carrier('cct')};
+  const rx={},pair={};
+  for(const u of ['as','cct']){const far=u==='as'?'cct':'as';
+    const pf=evalPair(u,car[far]),po=evalPair(u,car[u]);pair[u]={far:pf,own:po};
+    rx[u]={locked:isLock(pf)?{p:pf,src:far}:isLock(po)?{p:po,src:u}:null};}
+  const dir={};
+  for(const [d,src,dst] of [['out','as','cct'],['in','cct','as']]){
+    const c=car[src],pf=pair[dst].far,o={};
+    o.up=c.tx?'ok':'off';
+    o.txWhy=c.tx?null:(!c.on?'Carrier uit':(c.bucErr?'Buiten BUC-band':c.short));
+    o.txMuted=!c.on;
+    if(!c.tx){o.down='off';}
+    else if(!c.kuOk){o.down='off';o.satWhy='Downlink buiten Ku-band';}
+    else if(c.cw&&(pf.st==='cw')){o.down='cw';o.cw=true;o.rxWhy=WHY.cw;}
+    else if(isLock(pf)){o.down=pf.st==='errors'?'soft':'ok';o.lock=true;o.rxWhy=pf.st==='errors'?WHY.errors:null;}
+    else{o.down=(pf.st==='freq'||pf.st==='lnb')?'fade':'noise';
+      o.rxWhy=rx[dst].locked&&rx[dst].locked.src===dst?'Rx staat op eigen carrier (loopback)':WHY[pf.st];}
+    dir[d]=o;}
+  R={car,rx,pair,dir};
+  const now=performance.now();
+  for(const u of ['as','cct']){const c=car[u],s=c.tx?[c.up,c.cw,c.mod,c.fec,c.rate,S.tp].join():'';
+    if(s&&s!==sig[u])startT[u]=RM?-1e9:now; sig[u]=s;}
+}
+
+/* ---------- DOM bijwerken ---------- */
+const led=(id,on)=>$(id).classList.toggle('on',!!on);
+const fmtF=v=>v.toFixed(3);
+function updateFec(sel,mod,val){for(const o of sel.querySelectorAll('option')){if(o.value)o.disabled=!mcOf(mod,o.value);}sel.value=val;sel.classList.toggle('bad',!val);}
+function update(){compute();
+  for(const u of ['as','cct']){const s=S[u],c=R.car[u],st=R.rx[u];
+    updateFec($(`${u}-tx-fec`),s.tx.mod,s.tx.fec);updateFec($(`${u}-rx-fec`),s.rx.mod,s.rx.fec);
+    if(u==='as'){$('as-tx-on').setAttribute('aria-pressed',s.tx.on);$('as-tx-off').setAttribute('aria-pressed',!s.tx.on);}
+    else{const t=s.tx,st=!t.on?'idle':t.mode;
+      $('cct-b-cw').disabled=st!=='idle';$('cct-b-mod').disabled=st!=='cw';$('cct-b-abort').disabled=st==='idle'&&!t.pending;
+      $('cct-b-cw').setAttribute('aria-pressed',st==='cw');$('cct-b-mod').setAttribute('aria-pressed',st==='mod');
+      $('cct-b-cw').classList.toggle('pend',t.pending==='cw');$('cct-b-mod').classList.toggle('pend',t.pending==='mod');
+      $('cct-b-ok').hidden=!t.pending;$('cct-b-ok').textContent=t.pending==='cw'?'Confirm · start CW':'Confirm · Modulate';
+      $('cct-flow-st').textContent=t.pending?'Wacht op Confirm…':st==='idle'?'Status: zendt niet. Start altijd met CW.':st==='cw'?'Status: zendt CW. Kies Modulate om data te zenden.':'Status: zendt gemoduleerd.';}
+    led(`${u}-l-txon`,c.tx);led(`${u}-l-mmaj`,c.err||c.bucErr);led(`${u}-l-mmin`,c.over);
+    const lk=st.locked;
+    led(`${u}-l-lock`,lk);led(`${u}-l-dmaj`,!lk);led(`${u}-l-dmin`,lk&&lk.p.st==='errors');
+    for(const k of ['rate','mod','fec']){const el=$(`${u}-tx-${k}-f`),d=c.cw&&u==='as';el.classList.toggle('dis',d);el.querySelectorAll('input,select').forEach(x=>x.disabled=d);}
+    $(`${u}-tx-rate-box`).classList.toggle('bad',!!(c.m&&(s.tx.rate<c.m.min||s.tx.rate>c.m.max)));
+    $(`${u}-tx-rs`).textContent=c.cw?'— (CW)':c.Rs?c.Rs.toFixed(3)+' ksps':'—';
+    $(`${u}-tx-bw`).textContent=c.cw?'enkele lijn (CW)':c.occ?(c.occ/1000).toFixed(3)+' MHz':'—';
+    if(!msgT[u+'tx']){const m=$(`${u}-tx-msg`);
+      if(c.err||c.bucErr){m.textContent=c.err||c.bucErr;m.className='msg bad';}
+      else if(c.over){m.textContent='Overdrive: modemuitgang boven −10 dBm, de BUC gaat in compressie.';m.className='msg warn';}
+      else if(c.cw&&u==='cct'&&c.tx){m.textContent=`CW op ${fmtF(c.up)} MHz. Stel data rate, modulatie en FEC in en kies Modulate → Confirm.`;m.className='msg warn';}
+      else if(c.cw){m.textContent=c.tx?`CW: ongemoduleerde draaggolf op ${fmtF(c.up)} MHz uplink. Data rate, modulatie en FEC doen niet mee.`:'CW gekozen: zet de carrier aan om een zuivere draaggolf uit te zenden.';m.className='msg warn';}
+      else if(c.m&&c.m.est){m.textContent='8PSK LDPC: Eb/No-drempel geschat (niet in de prestatietabel).';m.className='msg';}
+      else{m.textContent=c.tx?'Carrier wordt uitgezonden.':(s.tx.on?'':(u==='cct'?'':'Carrier staat uit.'));m.className='msg';}}
+    const rm=mcOf(s.rx.mod,s.rx.fec);
+    $(`${u}-rx-rate-box`).classList.toggle('bad',!!(rm&&(s.rx.rate<rm.min||s.rx.rate>rm.max)));
+    if(!msgT[u+'rx']){const m=$(`${u}-rx-msg`);
+      if(!s.rx.fec){m.textContent='Kies een Inner FEC voor deze modulatie.';m.className='msg bad';}
+      else if(rm&&(s.rx.rate<rm.min||s.rx.rate>rm.max)){m.textContent=`Data rate buiten bereik voor ${s.rx.mod} ${s.rx.fec}: ${rm.min}–${rm.max} kbps.`;m.className='msg bad';}
+      else if(lk&&lk.src===u){m.textContent='Gelockt op de eigen carrier (loopback).';m.className='msg warn';}
+      else{m.textContent='';m.className='msg';}}
+    const pill=$(`${u}-rx-st`);
+    if(!lk){pill.textContent='GEEN LOCK';pill.className='pill bad';}
+    else if(lk.p.st==='errors'){pill.textContent='LOCK · BITFOUTEN';pill.className='pill warn';}
+    else{pill.textContent='LOCK';pill.className='pill ok';}
+    $(`${u}-rx-eb`).textContent=lk?lk.p.e.toFixed(1)+' dB':'—';
+    $(`${u}-rx-off`).textContent=lk?(lk.p.off>=0?'+':'−')+Math.abs(lk.p.off).toFixed(1)+' kHz':'—';
+  }
+  saInfo();chip('chipOut',R.dir.out,'CCT200');chip('chipIn',R.dir.in,'grondstation');
+}
+function chip(id,o,who){const el=$(id),b=el.querySelector('b');
+  if(o.cw){b.textContent='CW-draaggolf · geen data';el.className='chip warn';}
+  else if(o.lock&&o.down==='ok'){b.textContent=`lock op ${who}`;el.className='chip ok';}
+  else if(o.lock){b.textContent=`lock met bitfouten`;el.className='chip warn';}
+  else if(o.up==='off'){b.textContent=o.txMuted?'carrier uit':'geen uitzending';el.className='chip';}
+  else{b.textContent='geen lock';el.className='chip bad';}}
+
+/* ---------- zendweg tekenen ---------- */
+const cv=$('cZw'),cx=cv.getContext('2d');const VW=1000,VH=510;let sc=1,dpr=1;
+function size(){const r=cv.getBoundingClientRect();dpr=Math.min(2,devicePixelRatio||1);cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);sc=r.width/VW;}
+new ResizeObserver(size).observe(cv);size();
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const C={};function cols(){for(const k of ['bg','panel2','fg','muted','trace','out','in','ok','bad','rule','grid','tan','metal','wire'])C[k]=css('--'+k);}cols();
+const P=(x,y)=>({x,y});
+const SEG={
+  out:[[P(240,300),P(452,178)],[P(452,178),P(548,178)],[P(548,178),P(798,322)]],
+  in:[[P(796,340),P(548,222)],[P(548,222),P(452,222)],[P(452,222),P(246,333)]]
+};
+const len=s=>Math.hypot(s[1].x-s[0].x,s[1].y-s[0].y);
+const along=(s,d)=>{const L=len(s),t=d/L;return P(s[0].x+(s[1].x-s[0].x)*t,s[0].y+(s[1].y-s[0].y)*t)};
+const fs=n=>Math.max(n,8.5/sc);
+const STARS=Array.from({length:70},(_,i)=>{const r=Math.sin(i*91.7)*43758.5;const a=r-Math.floor(r),b=Math.sin(i*12.9)*9137.1;const c=b-Math.floor(b);return P(a*VW,c*300)});
+const SCR={},GLY='01<>/#%&$@*+=ABCDEFHKLMNPRSTXZ0123456789';
+function text(t,x,y,size,col,align='left',font='display',weight=600){ // HUD-tekst: monospace, gloed, decodeert bij elke wijziging
+  t=String(t);if(!/\d/.test(t))t=t.toUpperCase();const key=Math.round(x)+','+Math.round(y),now=performance.now();
+  let e=SCR[key];if(!e||e.s!==t){e=SCR[key]={s:t,t0:e?now:now-200*Math.random()};}
+  const el=now-e.t0,dur=380+t.length*14;let out=t;
+  if(el<dur&&!RM){const k=el/dur,n=Math.floor(k*t.length);out=t.slice(0,n)+[...t.slice(n)].map(c=>c===' '?' ':GLY[(Math.random()*GLY.length)|0]).join('');}
+  const flick=0.92+0.08*Math.sin(now/90+x*0.13);
+  cx.font=`400 ${fs(size*1.05)}px "Share Tech Mono","JetBrains Mono",monospace`;cx.letterSpacing='0.06em';
+  cx.textAlign=align;cx.textBaseline='alphabetic';cx.shadowColor=col;cx.shadowBlur=6;cx.globalAlpha=flick;cx.fillStyle=col;cx.fillText(out,x,y);
+  cx.shadowBlur=0;cx.globalAlpha=1;cx.letterSpacing='0px';}
+function rgba(hex,a){const h=hex.replace('#','');const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+
+/* ---- wireframe-hardware (hologramstijl) ---- */
+function wstyle(a=0.9,w=1){cx.strokeStyle=rgba(C.wire,a);cx.lineWidth=w;cx.shadowColor=C.wire;cx.shadowBlur=4;}
+function gs(){cx.save();cx.shadowBlur=0;cx.lineWidth*=3.4;cx.globalAlpha=0.14;cx.stroke();cx.restore();cx.stroke();}
+function line(pts){cx.beginPath();pts.forEach((p,i)=>i?cx.lineTo(p.x,p.y):cx.moveTo(p.x,p.y));gs();}
+function rect(x,y,w,h){cx.beginPath();cx.rect(x,y,w,h);gs();}
+function ell(x,y,rx,ry,a0=0,a1=Math.PI*2){cx.beginPath();cx.ellipse(x,y,rx,ry,0,a0,a1);gs();}
+function wbox(x,y,w,h,dx=10,dy=-7,a=0.85){ // draadmodel-kubus: achterribben vaag, voorvlak scherp
+  cx.fillStyle=rgba(C.wire,.045);cx.fillRect(x,y,w,h);
+  wstyle(a*0.35,0.8);rect(x+dx,y+dy,w,h);line([P(x,y+h),P(x+dx,y+h+dy)]);
+  wstyle(a,1);rect(x,y,w,h);line([P(x,y),P(x+dx,y+dy),P(x+w+dx,y+dy),P(x+w+dx,y+h+dy),P(x+w,y+h)]);line([P(x+w,y),P(x+w+dx,y+dy)]);}
+function dishMesh(rx,ry,depth,cxr=0,rings=5,ribs=14,a=0.9){ // paraboloïde in lokaal frame, opening naar +x
+  const ringPt=(k,ph)=>P(cxr-depth*(1-k*k)+rx*k*Math.cos(ph),ry*k*Math.sin(ph));
+  const g=cx.createRadialGradient(cxr-depth*0.4,0,0,cxr,0,ry);g.addColorStop(0,rgba(C.wire,.10));g.addColorStop(1,rgba(C.wire,.02));
+  cx.fillStyle=g;cx.beginPath();cx.ellipse(cxr,0,rx,ry,0,0,Math.PI*2);cx.fill();
+  for(let r=1;r<rings;r++){const k=r/rings,x=cxr-depth*(1-k*k);
+    wstyle(a*0.18,0.7);ell(x,0,rx*k,ry*k,Math.PI/2,Math.PI*1.5);wstyle(a*0.5,0.8);ell(x,0,rx*k,ry*k,-Math.PI/2,Math.PI/2);}
+  for(let b=0;b<ribs;b++){const ph=b/ribs*Math.PI*2,pts=[];for(let k=0;k<=1.001;k+=0.125)pts.push(ringPt(k,ph));
+    wstyle(a*(0.15+0.4*(Math.cos(ph)+1)/2),0.75);line(pts);}
+  wstyle(a*0.55,1.2);ell(cxr,0,rx,ry,Math.PI/2,Math.PI*1.5);wstyle(a,1.5);ell(cxr,0,rx,ry,-Math.PI/2,Math.PI/2);
+  wstyle(a*0.4,0.8);ell(cxr-1.5,0,rx*0.97,ry*0.985);}
+const EARTH={cx:500,R:4200,top:441};EARTH.cy=EARTH.top+EARTH.R;
+function floor(){cx.save();const E=EARTH;cx.shadowBlur=0;
+  const g=cx.createLinearGradient(0,E.top-10,0,VH);g.addColorStop(0,rgba(C.wire,.10));g.addColorStop(.25,rgba(C.wire,.03));g.addColorStop(1,rgba(C.wire,0));
+  cx.fillStyle=g;cx.beginPath();cx.arc(E.cx,E.cy,E.R,-Math.PI/2-0.13,-Math.PI/2+0.13);cx.lineTo(VW,VH);cx.lineTo(0,VH);cx.closePath();cx.fill();
+  wstyle(.55,1.2);cx.beginPath();cx.arc(E.cx,E.cy,E.R,-Math.PI/2-0.13,-Math.PI/2+0.13);gs();
+  cx.shadowBlur=0;
+  [6,14,25,40,58,80].forEach((d,k)=>{cx.strokeStyle=rgba(C.wire,.2-k*.025);cx.lineWidth=1;cx.beginPath();cx.arc(E.cx,E.cy,E.R-d,-Math.PI/2-0.13,-Math.PI/2+0.13);cx.stroke();});
+  cx.strokeStyle=rgba(C.wire,.13);for(let i=-16;i<=16;i++){const ang=-Math.PI/2+i*0.012,sp=1+Math.abs(i)*0.03;
+    cx.beginPath();cx.moveTo(E.cx+Math.cos(ang)*E.R,E.cy+Math.sin(ang)*E.R);cx.lineTo(E.cx+Math.cos(ang)*E.R+(i*14*sp),E.cy+Math.sin(ang)*E.R+90);cx.stroke();}
+  cx.restore();}
+const groundY=x=>EARTH.cy-Math.sqrt(EARTH.R**2-(x-EARTH.cx)**2);
+function scan(t){const y=((t/7000)%1)*(VH+120)-60;const g=cx.createLinearGradient(0,y-40,0,y+40);
+  g.addColorStop(0,rgba(C.wire,0));g.addColorStop(.5,rgba(C.wire,.06));g.addColorStop(1,rgba(C.wire,0));cx.fillStyle=g;cx.fillRect(0,y-40,VW,80);}
+
+function solarWing(side){ // kruisvormige vleugel zoals SES-4: rij van vier panelen, kruis op het derde
+  const pw=24,ph=20,gap=3,x0=side*58,dir=side;
+  wstyle(.8,1.1);line([P(side*22,0),P(x0,0)]);line([P(side*22,-3),P(side*30,0),P(side*22,3)]);
+  const cells=[];for(let c=0;c<4;c++)cells.push([c,0]);cells.push([2,-1],[2,1]);
+  for(const [c,r] of cells){const x=dir>0?x0+c*(pw+gap):x0-(c+1)*(pw+gap)+gap,y=r*(ph+gap)-ph/2;
+    const g=cx.createLinearGradient(x,y,x+pw,y+ph);g.addColorStop(0,rgba(C.wire,.10));g.addColorStop(1,rgba(C.wire,.03));
+    cx.fillStyle=g;cx.fillRect(x,y,pw,ph);
+    wstyle(.28,.6);for(let k=1;k<4;k++)line([P(x+k*pw/4,y),P(x+k*pw/4,y+ph)]);for(let k=1;k<3;k++)line([P(x,y+k*ph/3),P(x+pw,y+k*ph/3)]);
+    wstyle(.9,1.1);rect(x,y,pw,ph);}
+}
+function drawSat(t){const x=500,y=200;cx.save();cx.translate(x,y);cx.scale(0.68,0.68);cx.rotate(-0.2);
+  solarWing(-1);solarWing(1);
+  // grote reflectoren aan oost- en westzijde
+  wstyle(.7,1);line([P(-20,-14),P(-34,-22)]);line([P(-20,4),P(-36,-4)]);
+  cx.save();cx.translate(-48,-18);cx.rotate(Math.PI+0.55);dishMesh(9,29,11,0,5,14,.95);cx.restore();
+  wstyle(.7,1);line([P(18,10),P(32,20)]);line([P(18,24),P(30,30)]);
+  cx.save();cx.translate(44,26);cx.rotate(0.6);dishMesh(8,25,10,0,5,14,.95);cx.restore();
+  // bus en bovendek
+  wbox(-20,-34,38,68,12,-8,.95);
+  wstyle(.35,.7);for(let k=1;k<4;k++)line([P(-20,-34+k*17),P(18,-34+k*17)]);line([P(-1,-34),P(-1,34)]);
+  wbox(-8,-50,16,16,6,-4,.9);
+  wstyle(.85,1);line([P(-4,-50),P(-10,-62)]);line([P(6,-50),P(12,-60)]);
+  cx.save();cx.translate(-11,-63);cx.rotate(-Math.PI/2-0.4);dishMesh(3,9,4,0,3,8,.9);cx.restore();
+  cx.save();cx.translate(13,-61);cx.rotate(-Math.PI/2+0.5);dishMesh(3,7,3,0,2,8,.9);cx.restore();
+  // apogeemotor onder
+  wstyle(.8,1);line([P(-6,34),P(-9,44),P(5,44),P(2,34)]);ell(-2,44,7,2.4);
+  cx.restore();cx.shadowBlur=0;
+  text('SES-4',x,y-60,15,C.fg,'center');if(Math.floor(performance.now()/530)%2){cx.fillStyle=C.fg;cx.fillRect(x+fs(15)*1.75,y-60-fs(15)*0.75,fs(15)*0.5,fs(15)*0.85);}
+  text(`Translatie −${TP[S.tp]} MHz`,x,y+92,13,C.trace,'center','mono',600);
+}
+function drawGS(){const x=160,y=326,a=Math.atan2(200-y,500-x);
+  // fundatie en azimutdraaikrans
+  wstyle(.75,1);cx.fillStyle=rgba(C.wire,.035);cx.beginPath();cx.moveTo(92,438);cx.lineTo(212,438);cx.lineTo(234,456);cx.lineTo(114,456);cx.closePath();cx.fill();gs();
+  wstyle(.22,.7);for(let i=1;i<5;i++){line([P(92+i*24,438),P(114+i*24,456)]);}line([P(103,447),P(223,447)]);
+  wstyle(.5,.9);ell(164,436,32,7,0,Math.PI);wstyle(.9,1.1);ell(164,424,32,7);line([P(132,424),P(132,436)]);line([P(196,424),P(196,436)]);
+  wstyle(.3,.7);for(let k=-2;k<=2;k++)line([P(164+k*12,424+Math.sqrt(1-(k*12/32)**2)*7),P(164+k*12,436+Math.sqrt(1-(k*12/32)**2)*7)]);
+  // taps toelopende kolom
+  cx.fillStyle=rgba(C.wire,.04);cx.beginPath();cx.moveTo(148,424);cx.lineTo(154,360);cx.lineTo(176,360);cx.lineTo(182,424);cx.closePath();cx.fill();
+  wstyle(.9,1);line([P(148,424),P(154,360),P(176,360),P(182,424)]);wstyle(.3,.7);line([P(165,360),P(165,424)]);
+  for(let yy=372;yy<424;yy+=13)line([P(151+(424-yy)*0.0,yy),P(179,yy+7)]);
+  // elevatie-as en kop
+  wbox(144,340,42,22,9,-6,.9);wstyle(.9,1);ell(165,351,7,7);
+  cx.save();cx.translate(x,y);cx.rotate(a);
+  // achterconstructie, contragewicht en vijzel
+  wstyle(.5,.8);line([P(-34,0),P(-18,-50),P(-4,-74)]);line([P(-34,0),P(-18,50),P(-4,74)]);line([P(-18,-50),P(-18,50)]);line([P(-34,0),P(-44,0)]);
+  wbox(-56,-8,12,16,4,-3,.7);
+  cx.restore();
+  wstyle(.75,1);const jb=P(x+Math.cos(a)*(-18)-Math.sin(a)*40,y+Math.sin(a)*(-18)+Math.cos(a)*40);line([P(180,394),jb]);
+  wstyle(.35,.7);line([P(183,392),P(jb.x+3,jb.y+2)]);
+  cx.save();cx.translate(x,y);cx.rotate(a);
+  dishMesh(32,86,48,12,7,22,.98);
+  // cassegrain: subreflector op vier steunen, voedingshoorn uit het hart
+  wstyle(.85,1.05);line([P(36,-78),P(66,-6)]);line([P(36,78),P(66,6)]);wstyle(.45,.8);line([P(28,-40),P(66,-4)]);line([P(28,40),P(66,4)]);
+  wstyle(.95,1.2);ell(68,0,4,14);wstyle(.5,.8);ell(66,0,2,10);
+  wstyle(.8,1);line([P(-30,-7),P(4,-11),P(4,11),P(-30,7)]);wstyle(.5,.8);ell(4,0,2.5,11);
+  cx.restore();cx.shadowBlur=0;
+  text('GRONDSTATION',160,484,15,C.fg,'center');text('DMD2050E · L-band',160,501,11,C.muted,'center','mono',500);
+}
+function drawCCT(){ // CCT200: offset-reflector op positioner, feedarm laag naar voren, drie vakwerkpoten plat op de grond
+  const hub=P(866,410);
+  // poten: driehoekig vakwerk, bovenregel daalt naar de voet
+  for(const L of [P(748,450),P(990,446),P(912,470)]){
+    const topH=P(hub.x+(L.x-hub.x)*0.04,hub.y-12),botH=P(hub.x,hub.y+6);
+    wstyle(.95,1.2);line([topH,L]);line([botH,L]);
+    wstyle(.4,.7);const n=7,pts=[];for(let k=0;k<=n;k++){const t=k/n,a=P(topH.x+(L.x-topH.x)*t,topH.y+(L.y-topH.y)*t),b=P(botH.x+(L.x-botH.x)*t,botH.y+(L.y-botH.y)*t);pts.push(k%2?a:b);}line(pts);
+    wstyle(.9,1);ell(L.x,L.y+1,7,2.2);line([P(L.x,L.y-6),P(L.x,L.y+1)]);}
+  // kabel over de grond
+  wstyle(.5,1);cx.beginPath();cx.moveTo(884,414);cx.bezierCurveTo(930,440,950,470,1004,474);gs();
+  // positioner (zandkleurige kasten op de foto)
+  wbox(838,380,48,30,10,-7,.95);wstyle(.35,.7);for(let k=0;k<4;k++)line([P(844+k*8,388),P(844+k*8,402)]);
+  wbox(880,394,40,18,8,-5,.85);wstyle(.35,.7);line([P(886,403),P(914,403)]);
+  wbox(826,396,16,14,5,-4,.8);
+  cx.shadowBlur=0;cx.fillStyle=C.ok;cx.beginPath();cx.arc(878,388,2.6,0,Math.PI*2);cx.fill();
+  // elevatiejuk naar de achterkant van de reflector
+  wstyle(.9,1.1);line([P(852,374),P(866,328)]);line([P(872,374),P(884,330)]);wstyle(.45,.8);line([P(856,360),P(880,344)]);
+  wstyle(.95,1.1);ell(876,330,7,7);ell(876,330,3,3);
+  // feedarm laag naar voren, hoorn kijkt terug naar de reflector
+  wstyle(.95,1.2);line([P(836,392),P(812,368),P(804,346)]);line([P(842,388),P(818,364),P(809,344)]);
+  wstyle(.4,.7);line([P(838,390),P(826,372),P(816,366),P(812,356),P(806,350)]);
+  cx.save();cx.translate(802,336);cx.rotate(Math.atan2(-34,66));
+  cx.fillStyle=rgba(C.wire,.08);cx.beginPath();cx.moveTo(-8,-3);cx.lineTo(7,-9);cx.lineTo(7,9);cx.lineTo(-8,3);cx.closePath();cx.fill();
+  wstyle(.95,1.1);line([P(-8,-3),P(7,-9)]);line([P(-8,3),P(7,9)]);line([P(-8,-3),P(-8,3)]);ell(7,0,2.6,9);wstyle(.45,.8);ell(1,0,1.8,6);
+  cx.restore();
+  // reflector: ondiepe offset-schotel, bijna frontaal, met dikke rand
+  const c=P(866,298),a=Math.atan2(200-c.y,500-c.x);
+  cx.save();cx.translate(c.x,c.y);cx.rotate(a);
+  wstyle(.45,.9);ell(-5,0,38,60,Math.PI/2,Math.PI*1.5);
+  dishMesh(38,60,12,0,6,22,.98);
+  wstyle(.35,.8);ell(-2,0,33,54);
+  cx.restore();cx.shadowBlur=0;
+  text('CCT200',860,488,15,C.fg,'center');text('REMOTE · KU',860,503,11,C.muted,'center','mono',500);
+}
+
+function wave(seg,d0,d1,col,A,lam,t,mode,cw=false){
+  const L=len(seg);d1=Math.min(d1,L);if(d1<=d0)return;
+  const ux=(seg[1].x-seg[0].x)/L,uy=(seg[1].y-seg[0].y)/L,nx=-uy,ny=ux;
+  const step=3;let prev=null;
+  cx.lineWidth=2;cx.lineCap='round';
+  for(let s=d0;s<=d1;s+=step){const fr=s/L;
+    let a=A,j=0,al=1,c=col;
+    if(mode==='fade'){al=1-Math.min(1,Math.max(0,(fr-0.5)/0.42));}
+    if(mode==='noise'&&fr>0.55){const k=(fr-0.55)/0.45;j=(Math.random()-0.5)*k*26;a=A*(1-k*0.6);c=k>0.5?C.muted:col;}
+    if(mode==='soft'&&fr>0.7){j=(Math.random()-0.5)*(fr-0.7)*18;}
+    let ph=(s-t*0.13)/lam*Math.PI*2;
+    if(!cw){const k=Math.floor((s-t*0.13)/(lam*1.5)),h=Math.sin(k*12.9898)*43758.5453;if(h-Math.floor(h)>0.5)ph+=Math.PI;}
+    const o=a*Math.sin(ph)+j;
+    const p=P(seg[0].x+ux*s+nx*o,seg[0].y+uy*s+ny*o);
+    if(prev&&al>0.02){cx.strokeStyle=rgba(c,al);cx.beginPath();cx.moveTo(prev.x,prev.y);cx.lineTo(p.x,p.y);cx.stroke();}
+    prev=p;}
+}
+function marker(p,col){cx.beginPath();cx.arc(p.x,p.y,9,0,Math.PI*2);cx.fillStyle=C.panel2;cx.fill();cx.lineWidth=1.6;cx.strokeStyle=col;cx.stroke();
+  cx.beginPath();cx.moveTo(p.x-4,p.y-4);cx.lineTo(p.x+4,p.y+4);cx.moveTo(p.x+4,p.y-4);cx.lineTo(p.x-4,p.y+4);cx.stroke();}
+function lockRing(p,t,col){const k=(t/900)%1;cx.lineWidth=2;cx.strokeStyle=col;cx.beginPath();cx.arc(p.x,p.y,7,0,Math.PI*2);cx.stroke();
+  cx.strokeStyle=rgba(col,1-k);cx.beginPath();cx.arc(p.x,p.y,7+k*14,0,Math.PI*2);cx.stroke();}
+
+let paused=false,tFrozen=0;
+$('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'Verder':'Pauze';};
+function draw(t){
+  cx.setTransform(sc*dpr,0,0,sc*dpr,0,0);
+  cx.fillStyle=C.panel2;cx.fillRect(0,0,VW,VH);
+  cx.fillStyle='rgba(212,226,228,.22)';for(const s of STARS){cx.fillRect(s.x,s.y,1.2,1.2);}
+  floor();
+  drawSat(t);drawGS();drawCCT();scan(t);
+  text('OUTBOUND · OUTROUTE',500,112,14,C.out,'center');
+  text('INBOUND · INROUTE',500,266,14,C.in,'center');
+  const DIRS=[['out','as',C.out],['in','cct',C.in]];
+  for(const [d,src,col] of DIRS){const segs=SEG[d],o=R.dir[d],c=R.car[src];
+    for(let i=0;i<3;i++){cx.strokeStyle=rgba(col,.18);cx.lineWidth=1.2;if(i===1)cx.setLineDash([6,6]);cx.beginPath();cx.moveTo(segs[i][0].x,segs[i][0].y);cx.lineTo(segs[i][1].x,segs[i][1].y);cx.stroke();cx.setLineDash([]);}
+    if(c.tx){const front=(t-startT[src])*0.75;const A=3+(c.pwr+40)/40*9,lam=c.cw?22:Math.max(12,42-7*Math.log10(c.rate));
+      const L0=len(segs[0]),L1=len(segs[1]);
+      cx.save();cx.shadowColor=col;cx.shadowBlur=6;
+      wave(segs[0],0,front,col,A,lam,t,'ok',c.cw);
+      if(front>L0){const f1=Math.min(L1,front-L0);cx.strokeStyle=col;cx.lineWidth=2;cx.setLineDash([7,6]);cx.lineDashOffset=-t*0.06;
+        cx.beginPath();cx.moveTo(segs[1][0].x,segs[1][0].y);const e=along(segs[1],f1);cx.lineTo(e.x,e.y);cx.stroke();cx.setLineDash([]);
+        const tip=along(segs[1],f1);cx.fillStyle=col;cx.beginPath();cx.arc(tip.x,tip.y,3,0,Math.PI*2);cx.fill();}
+      if(front>L0+L1&&o.down!=='off'){cx.shadowBlur=o.down==='ok'?6:0;wave(segs[2],0,front-L0-L1,col,A,lam,t,o.down==='cw'?'ok':o.down,c.cw);}
+      cx.restore();
+      const done=front>L0+L1+len(segs[2]);
+      const end=along(segs[2],len(segs[2])-4);
+      {const s0=segs[0][0],k=0.5+0.5*Math.sin(t/180);const g=cx.createRadialGradient(s0.x,s0.y,0,s0.x,s0.y,14);g.addColorStop(0,rgba(col,.55*k+.25));g.addColorStop(1,rgba(col,0));cx.fillStyle=g;cx.beginPath();cx.arc(s0.x,s0.y,14,0,Math.PI*2);cx.fill();}
+      if(front>L0){const m=along(segs[0],L0);const g=cx.createRadialGradient(m.x,m.y,0,m.x,m.y,10);g.addColorStop(0,rgba(col,.5));g.addColorStop(1,rgba(col,0));cx.fillStyle=g;cx.beginPath();cx.arc(m.x,m.y,10,0,Math.PI*2);cx.fill();}
+      if(done&&o.lock)lockRing(end,t,o.down==='ok'?C.ok:C.trace);}
+    // frequentielabels
+    const up=c.tx?fmtF(c.up)+' MHz'+(c.cw?' · CW':''):'—',dn=(c.tx&&c.kuOk)?fmtF(c.dl)+' MHz':'—';
+    if(d==='out'){text('AS UPLINK',328,212,14,col,'right');text(up,328,229,12,C.fg,'right','mono',500);
+      text('AS DOWNLINK',692,224,14,col,'left');text(dn,692,241,12,C.fg,'left','mono',500);
+      text('Tx AS',236,286,13,C.fg,'right');text('Rx Unit',786,288,13,C.fg,'right');}
+    else{text('UNIT UPLINK',662,316,14,col,'right');text(up,662,333,12,C.fg,'right','mono',500);
+      text('UNIT DOWNLINK',372,324,14,col,'left');text(dn,372,341,12,C.fg,'left','mono',500);
+      text('Tx Unit',776,374,13,C.fg,'right');text('Rx AS',248,354,13,C.fg,'left');}
+    // foutmarkeringen
+    if(S.cause){
+      if(o.txWhy){const p=along(segs[0],22),mc=o.txMuted?C.muted:C.bad;marker(p,mc);
+        if(d==='out')text(o.txWhy,232,232,13,o.txMuted?C.muted:C.trace,'right','body',600);
+        else text(o.txWhy,p.x+16,p.y+22,13,o.txMuted?C.muted:C.trace,'left','body',600);}
+      if(o.satWhy){const p=along(segs[2],20);marker(p,C.bad);text(o.satWhy,p.x+14,p.y-10,13,C.trace,'left','body',600);}
+      if(o.rxWhy&&c.tx){const front=(t-startT[src])*0.75,Lt=len(segs[0])+len(segs[1])+len(segs[2]);
+        if(front>Lt){const p=along(segs[2],len(segs[2])-24),mc=o.lock?C.trace:C.bad;if(!o.lock)marker(p,mc);
+          if(d==='out')text(o.rxWhy,p.x+4,p.y-34,13,C.trace,'right','body',600);
+          else text(o.rxWhy,248,376,13,C.trace,'left','body',600);}}
+    }
+  }
+}
+
+/* ---------- spectrum analyzer grondstation ---------- */
+let saSpan=20;
+const saSeg=$('saSpan');
+const saPress=()=>saSeg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.v===saSpan));
+saSeg.onclick=e=>{const b=e.target.closest('button');if(!b)return;saSpan=+b.dataset.v;saPress();};saPress();
+function drawSA(){const el=$('as-spec'),r=el.getBoundingClientRect();if(!r.width)return;
+  const W=Math.round(r.width*dpr),H=Math.round(r.height*dpr);if(el.width!==W||el.height!==H){el.width=W;el.height=H;}
+  const g=el.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);const w=r.width,h=r.height,ph=h-16;
+  g.fillStyle=C.bg;g.fillRect(0,0,w,h);
+  const L=LNB[S.as.rx.lnb],cf=R.car.cct.dl,span=saSpan,f0=cf-span/2;
+  const X=f=>(f-f0)/span*w,dbMin=-4,dbMax=32,Y=db=>ph-2-(db-dbMin)/(dbMax-dbMin)*(ph-8);
+  g.strokeStyle=C.grid;g.lineWidth=1;g.beginPath();for(let i=1;i<10;i++){g.moveTo(w*i/10,0);g.lineTo(w*i/10,ph);}for(let i=1;i<8;i++){g.moveTo(0,ph*i/8);g.lineTo(w,ph*i/8);}g.stroke();
+  // demod-afstemming terugrekenen naar RF
+  const rx=S.as.rx,dRF=rx.f+L.lo-DRIFT.as;
+  if(dRF>f0-1&&dRF<f0+span+1){const a0=X(dRF-rx.acq/1000),a1=X(dRF+rx.acq/1000);g.fillStyle=rgba(C.trace,.12);g.fillRect(a0,0,Math.max(1,a1-a0),ph);
+    g.strokeStyle=rgba(C.trace,.7);g.setLineDash([3,3]);g.beginPath();g.moveTo(X(dRF),0);g.lineTo(X(dRF),ph);g.stroke();g.setLineDash([]);
+    g.font='500 10px "JetBrains Mono",monospace';g.fillStyle=C.trace;g.textBaseline='top';g.textAlign=X(dRF)>w-90?'right':'left';g.fillText('DEMOD',X(dRF)+(X(dRF)>w-90?-4:4),3);}
+  const cars=[];
+  for(const u of ['as','cct']){const c=R.car[u];if(!c.tx||!c.kuOk||c.dl<L.min||c.dl>L.max)continue;
+    cars.push(c.cw?{f:c.dl,bw:0,lvl:Math.min(32,Math.max(-3,cn0(c,'as')-60)),col:u==='as'?C.out:C.in}
+      :{f:c.dl,bw:c.Rs/1000,lvl:Math.min(30,Math.max(-3,ebno(c,'as')+10*Math.log10(c.m.bw))),col:u==='as'?C.out:C.in});}
+  const pts=[];for(let px=0;px<=w;px++){const f=f0+px/w*span;let p=Math.pow(10,(Math.random()-0.5)*1.4/10),top=null;
+    for(const c of cars){const d=Math.abs(f-c.f),hw=Math.max(c.bw/2,span/w*0.8),al=0.35;let k=0;
+      if(d<hw*(1-al))k=1;else if(d<hw*(1+al))k=0.5*(1+Math.cos(Math.PI*(d-hw*(1-al))/(2*al*hw)));
+      if(k>0){const v=Math.pow(10,c.lvl/10)*k;p+=v;if(!top||v>top.v)top={v,col:c.col};}}
+    pts.push({px,db:10*Math.log10(p),col:top&&top.v>1?top.col:C.trace});}
+  g.lineWidth=1.3;for(let i=1;i<pts.length;i++){g.strokeStyle=pts[i].col;g.beginPath();g.moveTo(pts[i-1].px,Y(pts[i-1].db));g.lineTo(pts[i].px,Y(pts[i].db));g.stroke();}
+  g.font='500 10px "JetBrains Mono",monospace';g.fillStyle=C.muted;g.textBaseline='bottom';
+  g.textAlign='left';g.fillText(`CF ${cf.toFixed(3)} MHz`,4,h-1);
+  g.textAlign='center';g.fillText(`${(f0).toFixed(1)} … ${(f0+span).toFixed(1)}`,w/2,h-1);
+  g.textAlign='right';g.fillText(`SPAN ${span} MHz`,w-4,h-1);
+}
+function saInfo(){const L=LNB[S.as.rx.lnb],cf=R.car.cct.dl,c=R.car.cct;
+  const inBand=cf>=L.min&&cf<=L.max;
+  $('saInfo').innerHTML=`Center volgt de downlink van de CCT200: <b>${cf.toFixed(3)} MHz</b>. `+
+    (inBand?`De SA hangt achter de LNB, dus alleen carriers binnen de gekozen LNB-band zijn zichtbaar.`:`Deze frequentie valt buiten de gekozen LNB-band: de SA ziet hier alleen ruis.`)+
+    (c.tx?'':' De CCT200 zendt nu niet uit.');}
+
+/* ================= MULTIPLAYER (handmatig koppelen, WebRTC) ================= */
+const MP_VER='1.0';
+const FECALL=Object.entries(FECS).flatMap(([g,rs])=>rs.map(r=>g+' '+r));
+const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'}]};
+let ROLE='solo',pc=null,dc=null,conn='idle',applying=false,lastSeen=0,lastSent='',peerOk=false,connNote='';
+const other=()=>ROLE==='as'?'cct':'as';
+const NAME={as:'Grondstation',cct:'CCT200'};
+
+/* --- binnenkomende data is onbetrouwbaar: alles controleren en begrenzen --- */
+function cleanSide(u,d){const D=DEF(u),tx=(d&&typeof d.tx==='object'&&d.tx)||{},rx=(d&&typeof d.rx==='object'&&d.rx)||{};
+  const n=(v,lo,hi,def)=>typeof v==='number'&&isFinite(v)?Math.min(hi,Math.max(lo,v)):def;
+  const fec=v=>v===''||FECALL.includes(v)?v:D.tx.fec;
+  return {
+    tx:{on:tx.on===true,mode:tx.mode==='cw'?'cw':'mod',pending:null,pwr:n(tx.pwr,-40,0,D.tx.pwr),f:n(tx.f,0,30000,D.tx.f),
+        rate:n(tx.rate,0,60000,D.tx.rate),mod:MODS.includes(tx.mod)?tx.mod:D.tx.mod,fec:fec(tx.fec)},
+    rx:{f:n(rx.f,0,30000,D.rx.f),rate:n(rx.rate,0,60000,D.rx.rate),mod:MODS.includes(rx.mod)?rx.mod:D.rx.mod,fec:fec(rx.fec),
+        acq:D.rx.acq,lnb:rx.lnb==='high'?'high':'low'}};}
+
+/* --- codes: SDP inkorten, comprimeren en als base64url tonen --- */
+const b64e=u8=>{let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');};
+const b64d=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return Uint8Array.from(atob(s),c=>c.charCodeAt(0));};
+async function zip(u8,pack){if(typeof CompressionStream==='undefined')return null;
+  const st=pack?new CompressionStream('deflate-raw'):new DecompressionStream('deflate-raw');
+  return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(st)).arrayBuffer());}
+const slim=sdp=>sdp.split(/\r?\n/).filter(l=>l&&!/^a=candidate:\S+ \d+ tcp /i.test(l)&&!/^a=extmap-allow-mixed/.test(l)&&!/^a=msid-semantic/.test(l)).join('\n');
+/* compact formaat (versie 2): alleen ufrag, pwd, fingerprint, rol en UDP-kandidaten, binair verpakt (~120 tekens) */
+function pack(sdp){const L=sdp.split(/\r?\n/),g=re=>{for(const l of L){const m=re.exec(l);if(m)return m[1];}return null;};
+  const uf=g(/^a=ice-ufrag:(\S+)/),pw=g(/^a=ice-pwd:(\S+)/),fp=g(/^a=fingerprint:sha-256 ([0-9A-Fa-f:]+)/),su=g(/^a=setup:(\w+)/);
+  if(!uf||!pw||!fp||!su||uf.length>255||pw.length>255)return null;
+  const fb=fp.split(':').map(h=>parseInt(h,16));if(fb.length!==32)return null;
+  const cs=[];for(const l of L){const m=/^a=candidate:\S+ 1 udp \d+ (\S+) (\d+) typ (host|srflx|prflx|relay)/i.exec(l);if(m)cs.push(m);}
+  if(!cs.length||cs.length>12)return null;
+  const out=[],te=new TextEncoder(),str=x=>{const b=te.encode(x);out.push(b.length,...b);};
+  out.push(2);str(uf);str(pw);out.push(...fb);out.push({actpass:0,active:1,passive:2}[su]??0);out.push(cs.length);
+  for(const m of cs){const [ ,ip,port,typ]=m;out.push(['host','srflx','prflx','relay'].indexOf(typ.toLowerCase()));
+    let k=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.local$/i.exec(ip),v4=/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(ip);
+    if(k){out.push(1,...ip.slice(0,36).replace(/-/g,'').match(/../g).map(h=>parseInt(h,16)));}
+    else if(v4){out.push(2,+v4[1],+v4[2],+v4[3],+v4[4]);}
+    else str((out.push(3),ip));
+    out.push(+port>>8,+port&255);}
+  return new Uint8Array(out);}
+function unpack(u8){let i=0;const td=new TextDecoder(),rd=()=>{if(i>=u8.length)throw new Error('format');return u8[i++];},
+  str=()=>{const n=rd();if(i+n>u8.length)throw new Error('format');const x=td.decode(u8.subarray(i,i+n));i+=n;return x;};
+  if(rd()!==2)throw new Error('format');const uf=str(),pw=str();
+  const fp=[];for(let k=0;k<32;k++)fp.push(rd().toString(16).padStart(2,'0').toUpperCase());
+  const su=['actpass','active','passive'][rd()]||'actpass',n=rd(),cand=[];
+  for(let c=0;c<n;c++){const typ=['host','srflx','prflx','relay'][rd()]||'host',k=rd();let ip;
+    if(k===1){const h=[];for(let j=0;j<16;j++)h.push(rd().toString(16).padStart(2,'0'));const x=h.join('');ip=`${x.slice(0,8)}-${x.slice(8,12)}-${x.slice(12,16)}-${x.slice(16,20)}-${x.slice(20)}.local`;}
+    else if(k===2)ip=[rd(),rd(),rd(),rd()].join('.');else ip=str();
+    if(!/^[0-9A-Za-z.:\-]+$/.test(ip))throw new Error('format');
+    const port=rd()*256+rd(),pr={host:2122260223,srflx:1686052607,prflx:1853824767,relay:41885439}[typ];
+    cand.push(`a=candidate:${c+1} 1 udp ${pr} ${ip} ${port} typ ${typ}${typ==='host'?'':' raddr 0.0.0.0 rport 0'}`);}
+  if(!/^[\x21-\x7e]+$/.test(uf+pw))throw new Error('format');
+  return ['v=0','o=- 4611731400430051336 2 IN IP4 127.0.0.1','s=-','t=0 0','a=group:BUNDLE 0',
+    'm=application 9 UDP/DTLS/SCTP webrtc-datachannel','c=IN IP4 0.0.0.0',...cand,
+    'a=ice-ufrag:'+uf,'a=ice-pwd:'+pw,'a=ice-options:trickle','a=fingerprint:sha-256 '+fp.join(':'),
+    'a=setup:'+su,'a=mid:0','a=sctp-port:5000','a=max-message-size:262144'].join('\r\n')+'\r\n';}
+async function encode(kind,sdp){const p=pack(sdp);if(p)return `ZW${kind}2.`+b64e(p);
+  const raw=new TextEncoder().encode(slim(sdp)),z=await zip(raw,true);return `ZW${kind}${z?1:0}.`+b64e(z||raw);}
+async function decode(kind,code){const m=/^ZW([OA])([012])\.([A-Za-z0-9_-]+)$/.exec(String(code).replace(/\s+/g,''));
+  if(!m)throw new Error('format');
+  if(m[1]!==kind)throw new Error(kind==='O'?'kreeg-antwoord':'kreeg-sessie');
+  let u8;try{u8=b64d(m[3]);}catch(e){throw new Error('format');}
+  if(m[2]==='2')return unpack(u8);
+  if(m[2]==='1'){const z=await zip(u8,false).catch(()=>{throw new Error('format')});if(!z)throw new Error('browser');u8=z;}
+  const sdp=new TextDecoder().decode(u8);if(sdp.length>20000||!sdp.startsWith('v=0'))throw new Error('format');
+  return sdp.split('\n').join('\r\n')+'\r\n';}
+const codeErr=e=>({'kreeg-antwoord':'Dit is een antwoordcode. Hier hoort de sessiecode van het grondstation.',
+  'kreeg-sessie':'Dit is een sessiecode. Hier hoort de antwoordcode van de CCT200.',
+  browser:'Deze browser kan de code niet uitpakken. Gebruik een recente Chrome, Edge, Firefox of Safari.'}[e.message]
+  ||'Deze code is niet compleet of klopt niet. Kopieer hem opnieuw in zijn geheel.');
+
+function gather(p){return new Promise(r=>{if(p.iceGatheringState==='complete')return r();
+  const t=setTimeout(r,4000);p.addEventListener('icegatheringstatechange',()=>{if(p.iceGatheringState==='complete'){clearTimeout(t);r();}});});}
+
+function closePeer(){try{dc&&dc.close()}catch(e){}try{pc&&pc.close()}catch(e){}pc=dc=null;peerOk=false;}
+function newPeer(){closePeer();pc=new RTCPeerConnection(ICE);
+  pc.onconnectionstatechange=()=>{const s=pc&&pc.connectionState;
+    if(s==='failed')lost('De directe verbinding is mislukt. Mogelijk blokkeert een firewall WebRTC. Probeer het op hetzelfde netwerk.');
+    else if(s==='disconnected')setConn('stil','Verbinding hapert…');};
+  return pc;}
+function wire(ch){dc=ch;
+  ch.onopen=()=>{lastSeen=performance.now();lastSent='';send({t:'hello',role:ROLE,ver:MP_VER});sendState(true);setConn('on');};
+  ch.onclose=()=>{if(conn==='on'||conn==='stil')lost('De verbinding met de andere speler is verbroken.');};
+  ch.onmessage=e=>{if(typeof e.data!=='string'||e.data.length>8000)return;let m;try{m=JSON.parse(e.data)}catch(x){return}
+    if(!m||typeof m!=='object')return;lastSeen=performance.now();if(conn==='stil')setConn('on');
+    if(m.t==='hello'){if(m.role===ROLE){lost(`Jullie hebben allebei ${NAME[ROLE]} gekozen. Eén van jullie moet de andere rol nemen.`);closePeer();return;}
+      peerOk=m.role===other();renderMp();}
+    else if(m.t==='state'&&m.side===other()){applying=true;S[other()]=cleanSide(other(),m.data);
+      if(other()==='as'&&typeof m.tp==='string'&&Object.prototype.hasOwnProperty.call(TP,m.tp)){S.tp=m.tp;$('tp').value=m.tp;}
+      fill(other());update();applying=false;}
+    else if(m.t==='bye'){lost('De andere speler heeft de verbinding verbroken.');closePeer();}};}
+function send(o){if(dc&&dc.readyState==='open')try{dc.send(JSON.stringify(o))}catch(e){}}
+function sendState(force){if(ROLE==='solo'||!dc||dc.readyState!=='open')return;
+  const msg={t:'state',side:ROLE,data:{tx:S[ROLE].tx,rx:S[ROLE].rx}};if(ROLE==='as')msg.tp=S.tp;
+  const j=JSON.stringify(msg);if(!force&&j===lastSent)return;lastSent=j;dc.send(j);}
+function lost(txt){if(ROLE!=='solo'){S[other()].tx.on=false;applying=true;update();applying=false;}setConn('lost',txt);}
+setInterval(()=>{if(conn==='on'||conn==='stil'){sendState(true);const q=performance.now()-lastSeen;if(q>15000)lost('Al 15 seconden niets gehoord van de andere speler. Zijn carrier is uit; koppel opnieuw.');else if(q>7000&&conn==='on')setConn('stil','Al een paar seconden niets gehoord van de andere speler.');}},2000);
+
+/* --- schermen --- */
+const PILL={idle:['NIET GEKOPPELD','pill'],wait:['KOPPELEN…','pill warn'],on:['GEKOPPELD','pill ok'],stil:['VERBINDING HAPERT','pill warn'],lost:['VERBINDING VERBROKEN','pill bad']};
+function setConn(c,note){conn=c;connNote=note||'';renderMp();
+  if(c==='on'&&$('mp').open){show('stOn');}}
+function renderMp(){document.body.classList.toggle('role-as',ROLE==='as');document.body.classList.toggle('role-cct',ROLE==='cct');
+  $('mpRole').textContent='ROL · '+(ROLE==='solo'?'SOLO':NAME[ROLE].toUpperCase());
+  const [t,c]=PILL[conn];const pill=$('mpConn');pill.textContent=ROLE==='solo'?'SOLO':t;pill.className=ROLE==='solo'?'pill':c;
+  $('mpOpen').textContent=conn==='on'||conn==='stil'?'Verbinding':'Koppelen';
+  $('tp').disabled=ROLE==='cct';$('tp').title=ROLE==='cct'?'Het grondstation kiest de transponder.':'';
+  if(ROLE!=='solo'){const o=other();$('peerName').innerHTML=`<span class="tag" style="background:${o==='as'?'var(--out)':'var(--in)'};width:10px;height:10px;display:inline-block;border-radius:2px;margin-right:8px"></span>${NAME[o]}`;
+    $('peerSt').textContent=PILL[conn][0];$('peerSt').style.color=conn==='on'?'var(--ok)':conn==='lost'?'var(--bad)':conn==='idle'?'var(--muted)':'var(--trace)';
+    $('peerTxt').textContent=(connNote?connNote+' ':'')+(conn==='on'||conn==='stil'?`Deze kant wordt bediend door de andere speler. Wat er daar is ingesteld, zie je alleen terug in de zendweg${ROLE==='as'?' en op de spectrum analyzer':''}.`
+      :`Koppel met de ${NAME[o]}-speler om samen een link op te bouwen. Zonder koppeling zendt de ${NAME[o]} niet.`);
+    $('peerOpen').textContent=conn==='on'||conn==='stil'?'Verbinding':'Koppelen';}
+  $('onTxt').textContent=ROLE==='solo'?'':`Je bent gekoppeld als ${NAME[ROLE]}. De ${NAME[other()]} wordt bediend door de andere speler.${ROLE==='as'?' Jij kiest de transponder.':' Het grondstation kiest de transponder.'}`;}
+function show(id){for(const s of document.querySelectorAll('.mpsec'))s.hidden=s.id!==id;}
+function st(id,txt,cls=''){const el=$(id);el.textContent=txt;el.className='mpst '+cls;}
+function openMp(){if(conn==='on'||conn==='stil')show('stOn');else show(ROLE==='as'?'stHost':ROLE==='cct'?'stJoin':'stRole');if(!$('mp').open)$('mp').showModal();}
+function copy(btn,ta){const v=ta.value;const ok=()=>{const t=btn.textContent;btn.textContent='Gekopieerd';setTimeout(()=>btn.textContent=t,1600);};
+  const fb=()=>{ta.focus();ta.select();try{document.execCommand('copy')&&ok()}catch(e){}};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(v).then(ok,fb);else fb();}
+
+function chooseRole(r){if(r!==ROLE){if(dc)send({t:'bye'});closePeer();conn='idle';connNote='';
+    if(ROLE!=='solo'){S[other()].tx.on=false;}
+    ROLE=r;for(const id of ['hOffer','hAnswer','jOffer','jAnswer'])$(id).value='';
+    $('hCopy').disabled=$('hConnect').disabled=$('jCopy').disabled=true;$('hLen').textContent='';st('hSt','');st('jSt','');
+    applying=true;update();applying=false;}
+  if(r==='solo'){$('mp').close();return;}
+  show(r==='as'?'stHost':'stJoin');}
+for(const b of document.querySelectorAll('.role'))b.onclick=()=>chooseRole(b.dataset.role);
+for(const b of document.querySelectorAll('[data-back]'))b.onclick=()=>show('stRole');
+for(const b of document.querySelectorAll('[data-close]'))b.onclick=()=>$('mp').close();
+$('mpOpen').onclick=openMp;$('peerOpen').onclick=openMp;
+$('mpDrop').onclick=()=>{send({t:'bye'});closePeer();lost('Je hebt de verbinding verbroken.');show(ROLE==='as'?'stHost':'stJoin');};
+
+/* grondstation: aanbod maken, antwoord verwerken */
+$('hMake').onclick=async()=>{$('hMake').disabled=true;st('hSt','Sessiecode maken…','warn');setConn('wait');
+  try{const p=newPeer();wire(p.createDataChannel('zendweg',{ordered:true}));
+    await p.setLocalDescription(await p.createOffer());await gather(p);
+    const code=await encode('O',p.localDescription.sdp);$('hOffer').value=code;$('hLen').textContent=code.length+' tekens';
+    $('hCopy').disabled=false;$('hConnect').disabled=false;st('hSt','Stuur de sessiecode naar de CCT200 en wacht op de antwoordcode.','warn');}
+  catch(e){st('hSt','Kon geen sessie starten in deze browser.','bad');setConn('idle');}
+  $('hMake').disabled=false;};
+$('hCopy').onclick=()=>copy($('hCopy'),$('hOffer'));
+$('hConnect').onclick=async()=>{if(!pc){st('hSt','Maak eerst een sessiecode.','bad');return;}
+  try{const sdp=await decode('A',$('hAnswer').value);
+    if(pc.signalingState!=='have-local-offer'){st('hSt','Deze sessiecode is al gebruikt. Maak een nieuwe sessiecode.','bad');return;}
+    await pc.setRemoteDescription({type:'answer',sdp});st('hSt','Verbinden…','warn');
+    setTimeout(()=>{if(conn==='wait')st('hSt','Nog geen verbinding. Controleer of jullie op hetzelfde netwerk zitten of dat een firewall WebRTC blokkeert.','bad');},12000);}
+  catch(e){st('hSt',e.message&&/format|kreeg|browser/.test(e.message)?codeErr(e):'Deze antwoordcode past niet bij deze sessie. Maak zo nodig een nieuwe sessiecode.','bad');}};
+
+/* CCT200: aanbod verwerken, antwoord maken */
+$('jMake').onclick=async()=>{$('jMake').disabled=true;
+  try{const sdp=await decode('O',$('jOffer').value);st('jSt','Antwoordcode maken…','warn');setConn('wait');
+    const p=newPeer();p.ondatachannel=e=>wire(e.channel);
+    await p.setRemoteDescription({type:'offer',sdp});await p.setLocalDescription(await p.createAnswer());await gather(p);
+    const code=await encode('A',p.localDescription.sdp);$('jAnswer').value=code;$('jCopy').disabled=false;
+    $('jLen').textContent=`${code.length} tekens. Stuur deze code terug naar het grondstation.`;
+    st('jSt','Wacht tot het grondstation je antwoordcode heeft geplakt…','warn');}
+  catch(e){st('jSt',codeErr(e),'bad');if(conn==='wait')setConn('idle');}
+  $('jMake').disabled=false;};
+$('jCopy').onclick=()=>copy($('jCopy'),$('jAnswer'));
+window.addEventListener('pagehide',()=>send({t:'bye'}));
+
+/* elke lokale wijziging gaat als volledige status naar de andere speler */
+const _update=update;
+/* sluit een tabblad netjes af: de ander krijgt 'bye' */
+update=function(){_update();if(!applying)sendState(false);};
+renderMp();
+setTimeout(()=>{if(!$('mp').open){show('stRole');$('mp').showModal();}},0);
+
+fill('as');fill('cct');update();
+let lastSpec=0;
+function frame(now){if(!paused)tFrozen=now;draw(tFrozen);if(now-lastSpec>120&&!paused){lastSpec=now;drawSA();}requestAnimationFrame(frame);}
+document.fonts&&document.fonts.load('16px "Share Tech Mono"').catch(()=>{});
+requestAnimationFrame(frame);
+})();
+</script>
