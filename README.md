@@ -6,18 +6,21 @@ Trainingssim voor beginnende satcom-operators, voor twee spelers. De ene speler 
 
 ## Koppelen
 
-De browsers praten direct met elkaar via WebRTC. Er is geen server, account of API-key nodig.
+1. Kies je rol: **Grondstation** of **CCT200**.
+2. Vul allebei dezelfde **sessienaam** in (bijvoorbeeld `LES-3A`), eventueel met een wachtwoord, en klik **Verbinden**.
+3. Zodra de andere rol in dezelfde sessie zit, staan jullie gekoppeld.
 
-1. Grondstation: kies de rol en klik **Maak sessiecode**. Stuur de code (±120 tekens) naar de CCT200-speler.
-2. CCT200: plak de sessiecode, klik **Maak antwoordcode** en stuur die terug.
-3. Grondstation: plak de antwoordcode en klik **Verbinden**.
+De koppeling loopt via de Ably-relay over gewoon HTTPS. Daardoor werkt hij ook in getunnelde werkomgevingen waar WebRTC uitstaat. De berichten zijn versleuteld met een sleutel die uit sessienaam en wachtwoord wordt afgeleid. De Ably-key in de pagina mag alleen publiceren, abonneren en aanwezigheid melden op kanalen `zwmp:*`.
 
-Op één netwerk werkt dit ook zonder internet. Over het internet vraagt elke browser eenmalig zijn publieke adres op bij een publieke STUN-server. Een strenge firewall kan de directe verbinding blokkeren.
+**Handmatig koppelen met codes** blijft beschikbaar als reserve. Dat is een directe WebRTC-verbinding zonder relay, en werkt alleen waar WebRTC aanstaat.
 
 Solo spelen kan ook: dan staan beide modems op één scherm.
+
+`ably.min.js` is de Ably JavaScript SDK 2.27.0 (Apache-2.0), meegeleverd zodat de pagina niet van een externe CDN afhangt.
 
 ## Versies
 
 | Versie | Wijziging |
 |---|---|
 | v1.0 | Eerste multiplayerversie, gebouwd op SES-4 Zendweg Lab v1.8 |
+| v1.1 | Koppelen via sessienaam over de Ably-relay (HTTPS); handmatige codes blijven als reserve |

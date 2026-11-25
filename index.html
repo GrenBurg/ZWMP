@@ -170,7 +170,7 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
 
 <div class="app">
   <header>
-    <h1>Zendweg <span>Multiplayer</span> <small class="ver mono">v1.0</small></h1>
+    <h1>Zendweg <span>Multiplayer</span> <small class="ver mono">v1.1</small></h1>
     <div class="mpbar">
       <span class="rolechip mono" id="mpRole">ROL · —</span>
       <span class="pill" id="mpConn">NIET GEKOPPELD</span>
@@ -205,19 +205,34 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
   </section>
   <div class="units" id="units"></div>
 
-  <p class="foot">Frequentieplan: de uplink van het grondstation is de Tx L-band plus de BUC-LO van 12.800 MHz (BUC-band 13.750–14.500 MHz). De satelliet verlaagt met de translatie van de gekozen transponder. De LNB in het grondstation zet de downlink om met LO 10.000 MHz (Ku laag, 10.700–11.700 MHz) of 10.750 MHz (Ku hoog, 11.700–12.750 MHz) en heeft een vaste drift van +2,7 kHz; de CCT200 rekent zelf om en heeft −1,4 kHz drift. De demod lockt als de carrier binnen het vaste zoekbereik van ±30 kHz valt en modulatie, FEC en data rate gelijk zijn. Beide ontvangers zien ook hun eigen carrier terug (loopback). De spectrum analyzer staat in het grondstation achter de LNB en toont de Ku-frequentie; de center volgt de downlink van de CCT200 en de gele markering is de afstemming van de demod, teruggerekend naar Ku. Modcods, data-ratebereiken en Eb/No-drempels komen uit het DMD2050E-datasheet (gegarandeerde Eb/No bij BER 10⁻⁷); 8PSK LDPC staat daar niet in de prestatietabel en is geschat. Onder de drempel lockt de demod met bitfouten, ruim 1 dB eronder niet meer. De Eb/No zelf is een indicatief model met een vaste linkwinst per richting en overdrive boven −10 dBm modemuitgang. Symbol rate = data rate / bandbreedte-efficiëntie, bezette bandbreedte met roll-off 0,35. Het grondstation kan in CW (ongemoduleerd) zenden: een zuivere draaggolf zonder data, die op de spectrum analyzer als smalle lijn verschijnt. Data rate, modulatie en FEC doen dan niet mee en geen demod lockt. De CCT200 start altijd in CW: CW → Confirm zet een draaggolf aan, Modulate → Confirm schakelt over op data, Abort stopt het zenden. Reset zet de sim-standaardwaarden (Tx mode normaal, carrier uit, −25 dBm). Multiplayer: elke speler stuurt alleen de instellingen van zijn eigen modem, en beide schermen rekenen daarmee dezelfde link door. Het grondstation kiest de transponder. Valt de verbinding weg, dan stopt de carrier van de andere kant. De koppeling is een directe, versleutelde WebRTC-verbinding tussen de browsers; over het internet vraagt elke browser eenmalig zijn publieke adres op bij een publieke STUN-server, op één netwerk is dat niet nodig.</p>
+  <p class="foot">Frequentieplan: de uplink van het grondstation is de Tx L-band plus de BUC-LO van 12.800 MHz (BUC-band 13.750–14.500 MHz). De satelliet verlaagt met de translatie van de gekozen transponder. De LNB in het grondstation zet de downlink om met LO 10.000 MHz (Ku laag, 10.700–11.700 MHz) of 10.750 MHz (Ku hoog, 11.700–12.750 MHz) en heeft een vaste drift van +2,7 kHz; de CCT200 rekent zelf om en heeft −1,4 kHz drift. De demod lockt als de carrier binnen het vaste zoekbereik van ±30 kHz valt en modulatie, FEC en data rate gelijk zijn. Beide ontvangers zien ook hun eigen carrier terug (loopback). De spectrum analyzer staat in het grondstation achter de LNB en toont de Ku-frequentie; de center volgt de downlink van de CCT200 en de gele markering is de afstemming van de demod, teruggerekend naar Ku. Modcods, data-ratebereiken en Eb/No-drempels komen uit het DMD2050E-datasheet (gegarandeerde Eb/No bij BER 10⁻⁷); 8PSK LDPC staat daar niet in de prestatietabel en is geschat. Onder de drempel lockt de demod met bitfouten, ruim 1 dB eronder niet meer. De Eb/No zelf is een indicatief model met een vaste linkwinst per richting en overdrive boven −10 dBm modemuitgang. Symbol rate = data rate / bandbreedte-efficiëntie, bezette bandbreedte met roll-off 0,35. Het grondstation kan in CW (ongemoduleerd) zenden: een zuivere draaggolf zonder data, die op de spectrum analyzer als smalle lijn verschijnt. Data rate, modulatie en FEC doen dan niet mee en geen demod lockt. De CCT200 start altijd in CW: CW → Confirm zet een draaggolf aan, Modulate → Confirm schakelt over op data, Abort stopt het zenden. Reset zet de sim-standaardwaarden (Tx mode normaal, carrier uit, −25 dBm). Multiplayer: elke speler stuurt alleen de instellingen van zijn eigen modem, en beide schermen rekenen daarmee dezelfde link door. Het grondstation kiest de transponder. Valt de verbinding weg, dan stopt de carrier van de andere kant. De koppeling loopt via de Ably-relay over gewoon HTTPS, zodat hij ook werkt in getunnelde werkomgevingen; de berichten zijn versleuteld met een sleutel die uit sessienaam en wachtwoord wordt afgeleid. Handmatig koppelen met codes maakt een directe WebRTC-verbinding en werkt alleen waar WebRTC aanstaat.</p>
 </div>
 
 <dialog class="mp" id="mp" aria-labelledby="mpTitle">
   <div class="mpin">
     <section id="stRole" class="mpsec">
       <h2 id="mpTitle">Zendweg <span>Multiplayer</span></h2>
-      <p>Eén speler bedient het grondstation, de ander de CCT200 in het veld. Jullie koppelen door twee keer een code uit te wisselen, via chat, mail of Teams. Daarna praten de browsers direct met elkaar.</p>
+      <p>Eén speler bedient het grondstation, de ander de CCT200 in het veld. Jullie kiezen samen een sessienaam, eventueel met wachtwoord, en vullen die allebei in. De koppeling loopt over gewoon HTTPS en is versleuteld met het wachtwoord.</p>
       <div class="roles">
-        <button class="role" type="button" data-role="as"><b><i class="tag" style="background:var(--out)"></i>Grondstation</b><span>DMD2050E, spectrum analyzer en de keuze van de transponder. Jij start de sessie.</span></button>
-        <button class="role" type="button" data-role="cct"><b><i class="tag" style="background:var(--in)"></i>CCT200</b><span>De veldterminal. Je krijgt een sessiecode van het grondstation.</span></button>
+        <button class="role" type="button" data-role="as"><b><i class="tag" style="background:var(--out)"></i>Grondstation</b><span>DMD2050E, spectrum analyzer en de keuze van de transponder.</span></button>
+        <button class="role" type="button" data-role="cct"><b><i class="tag" style="background:var(--in)"></i>CCT200</b><span>De veldterminal in het veld: CW, Modulate, Abort.</span></button>
         <button class="role" type="button" data-role="solo"><b><i class="tag" style="background:var(--muted)"></i>Solo</b><span>Beide kanten op één scherm, zonder koppeling.</span></button>
       </div>
+    </section>
+
+    <section id="stSess" class="mpsec" hidden>
+      <h2 id="sTitle">Sessie</h2>
+      <p>Spreek samen een sessienaam af, bijvoorbeeld <b class="mono">LES-3A</b>, en eventueel een wachtwoord. Beide spelers vullen precies hetzelfde in. Hoofdletters maken niet uit.</p>
+      <div class="step">
+        <div class="fgrid">
+          <label class="f" for="sName"><span class="fl">Sessienaam</span><span class="inp"><input id="sName" autocomplete="off" spellcheck="false" placeholder="LES-3A" maxlength="40"></span></label>
+          <label class="f" for="sPw"><span class="fl">Wachtwoord (optioneel)</span><span class="inp"><input id="sPw" type="password" autocomplete="off" placeholder="—" maxlength="60"></span></label>
+        </div>
+        <div class="row"><button class="btn go" id="sGo" type="button">Verbinden</button></div>
+      </div>
+      <p class="mpst" id="sSt" role="status"></p>
+      <div class="row"><button class="btn" type="button" data-back>Andere rol kiezen</button><button class="btn" type="button" data-close>Ongekoppeld verder</button><button class="btn" type="button" id="sManual">Handmatig koppelen met codes</button></div>
+      <p class="small">Handmatig koppelen werkt zonder relay, maar alleen in browsers waar WebRTC aanstaat. In de meeste werkomgevingen is dat niet zo.</p>
     </section>
 
     <section id="stHost" class="mpsec" hidden>
@@ -234,7 +249,7 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
         <div class="row"><button class="btn go" id="hConnect" type="button" disabled>Verbinden</button></div>
       </div>
       <p class="mpst" id="hSt" role="status"></p>
-      <div class="row"><button class="btn" type="button" data-back>Andere rol kiezen</button><button class="btn" type="button" data-close>Ongekoppeld verder</button></div>
+      <div class="row"><button class="btn" type="button" data-sess>Terug naar sessienaam</button><button class="btn" type="button" data-close>Ongekoppeld verder</button></div>
     </section>
 
     <section id="stJoin" class="mpsec" hidden>
@@ -250,7 +265,7 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
         <div class="row"><button class="btn" id="jCopy" type="button" disabled>Kopieer antwoordcode</button><span class="small" id="jLen">Stuur deze code terug naar het grondstation.</span></div>
       </div>
       <p class="mpst" id="jSt" role="status"></p>
-      <div class="row"><button class="btn" type="button" data-back>Andere rol kiezen</button><button class="btn" type="button" data-close>Ongekoppeld verder</button></div>
+      <div class="row"><button class="btn" type="button" data-sess>Terug naar sessienaam</button><button class="btn" type="button" data-close>Ongekoppeld verder</button></div>
     </section>
 
     <section id="stOn" class="mpsec" hidden>
@@ -781,9 +796,11 @@ function saInfo(){const L=LNB[S.as.rx.lnb],cf=R.car.cct.dl,c=R.car.cct;
     (c.tx?'':' De CCT200 zendt nu niet uit.');}
 
 /* ================= MULTIPLAYER (handmatig koppelen, WebRTC) ================= */
-const MP_VER='1.0';
+const MP_VER='1.1';
+const ABLY_KEY='Rk0XpA.odnQFw:c5cSSJfvdcerMJHc4yLP5JptRDgTPOr6me6MLVc1Nms'; /* alleen publish/subscribe/presence op zwmp:* */
 const FECALL=Object.entries(FECS).flatMap(([g,rs])=>rs.map(r=>g+' '+r));
 const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'}]};
+let MODE=null,ably=null,ach=null,sessName='',sendT=null;
 let ROLE='solo',pc=null,dc=null,conn='idle',applying=false,lastSeen=0,lastSent='',peerOk=false,connNote='';
 const other=()=>ROLE==='as'?'cct':'as';
 const NAME={as:'Grondstation',cct:'CCT200'};
@@ -865,23 +882,62 @@ function wire(ch){dc=ch;
   ch.onopen=()=>{lastSeen=performance.now();lastSent='';send({t:'hello',role:ROLE,ver:MP_VER});sendState(true);setConn('on');};
   ch.onclose=()=>{if(conn==='on'||conn==='stil')lost('De verbinding met de andere speler is verbroken.');};
   ch.onmessage=e=>{if(typeof e.data!=='string'||e.data.length>8000)return;let m;try{m=JSON.parse(e.data)}catch(x){return}
-    if(!m||typeof m!=='object')return;lastSeen=performance.now();if(conn==='stil')setConn('on');
+    handleMsg(m);};}
+function handleMsg(m){if(!m||typeof m!=='object')return;lastSeen=performance.now();if(conn==='stil'&&MODE==='p2p')setConn('on');
     if(m.t==='hello'){if(m.role===ROLE){lost(`Jullie hebben allebei ${NAME[ROLE]} gekozen. Eén van jullie moet de andere rol nemen.`);closePeer();return;}
       peerOk=m.role===other();renderMp();}
     else if(m.t==='state'&&m.side===other()){applying=true;S[other()]=cleanSide(other(),m.data);
       if(other()==='as'&&typeof m.tp==='string'&&Object.prototype.hasOwnProperty.call(TP,m.tp)){S.tp=m.tp;$('tp').value=m.tp;}
       fill(other());update();applying=false;}
-    else if(m.t==='bye'){lost('De andere speler heeft de verbinding verbroken.');closePeer();}};}
-function send(o){if(dc&&dc.readyState==='open')try{dc.send(JSON.stringify(o))}catch(e){}}
-function sendState(force){if(ROLE==='solo'||!dc||dc.readyState!=='open')return;
+    else if(m.t==='bye'&&MODE==='p2p'){lost('De andere speler heeft de verbinding verbroken.');closePeer();}}
+const linkUp=()=>MODE==='ably'?!!(ach&&ably&&ably.connection.state==='connected'):!!(dc&&dc.readyState==='open');
+function send(o){if(MODE==='ably'){if(linkUp())ach.publish('m',o).catch(()=>{});}
+  else if(dc&&dc.readyState==='open')try{dc.send(JSON.stringify(o))}catch(e){}}
+function sendState(force){if(ROLE==='solo'||!linkUp())return;
   const msg={t:'state',side:ROLE,data:{tx:S[ROLE].tx,rx:S[ROLE].rx}};if(ROLE==='as')msg.tp=S.tp;
-  const j=JSON.stringify(msg);if(!force&&j===lastSent)return;lastSent=j;dc.send(j);}
+  const j=JSON.stringify(msg);if(!force&&j===lastSent)return;
+  if(MODE==='ably'&&!force){clearTimeout(sendT);sendT=setTimeout(()=>sendState(true),150);return;} /* bundelt snelle klikken */
+  lastSent=j;send(msg);}
 function lost(txt){if(ROLE!=='solo'){S[other()].tx.on=false;applying=true;update();applying=false;}setConn('lost',txt);}
-setInterval(()=>{if(conn==='on'||conn==='stil'){sendState(true);const q=performance.now()-lastSeen;if(q>15000)lost('Al 15 seconden niets gehoord van de andere speler. Zijn carrier is uit; koppel opnieuw.');else if(q>7000&&conn==='on')setConn('stil','Al een paar seconden niets gehoord van de andere speler.');}},2000);
+setInterval(()=>{if(MODE==='p2p'&&(conn==='on'||conn==='stil')){sendState(true);const q=performance.now()-lastSeen;if(q>15000)lost('Al 15 seconden niets gehoord van de andere speler. Zijn carrier is uit; koppel opnieuw.');else if(q>7000&&conn==='on')setConn('stil','Al een paar seconden niets gehoord van de andere speler.');}},2000);
+
+/* --- relay via Ably: werkt over gewoon HTTPS, ook in getunnelde werkomgevingen --- */
+function loadAbly(){if(window.Ably)return Promise.resolve();
+  return new Promise((res,rej)=>{const go=l=>{if(!l.length)return rej(new Error('load'));const sc=document.createElement('script');sc.src=l[0];
+    sc.onload=()=>window.Ably?res():go(l.slice(1));sc.onerror=()=>{sc.remove();go(l.slice(1));};document.head.appendChild(sc);};
+    go(['ably.min.js','https://cdn.ably.com/lib/ably.min-2.js','https://cdn.jsdelivr.net/npm/ably@2.27.0/build/ably.min.js']);});}
+async function digest(t){if(!(window.crypto&&crypto.subtle))return null;return new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)));}
+const hex=u8=>Array.from(u8,b=>b.toString(16).padStart(2,'0')).join('');
+function ablyClose(){clearTimeout(sendT);try{ach&&ach.presence.leave().catch(()=>{})}catch(e){}try{ably&&ably.close()}catch(e){}ably=ach=null;}
+async function ablyConnect(name,pw){closePeer();ablyClose();MODE='ably';sessName=name;setConn('wait','Verbinden met de relay…');
+  await loadAbly();
+  const seed=name.toUpperCase()+'|'+pw,h=await digest('zwmp-kanaal|'+seed),k=await digest('zwmp-sleutel|'+seed);
+  const chan='zwmp:'+(h?hex(h).slice(0,24):encodeURIComponent(seed).replace(/[^A-Za-z0-9_-]/g,'_').slice(0,60));
+  const cid=ROLE+'-'+Math.random().toString(36).slice(2,10);
+  ably=new Ably.Realtime({key:ABLY_KEY,clientId:cid,echoMessages:false});const me=ably;
+  me.connection.on(sc=>{if(me!==ably)return;const c=sc.current;
+    if(c==='connected'){checkPresence();}
+    else if(c==='disconnected'||c==='suspended'){if(conn!=='idle')setConn('stil','De verbinding met de relay hapert. De sim probeert het zelf opnieuw.');}
+    else if(c==='failed'){setConn('lost','De relay is niet bereikbaar. Controleer de internetverbinding.');}});
+  ach=me.channels.get(chan,k?{cipher:{key:k.buffer}}:{});
+  await ach.subscribe('m',msg=>{if(me!==ably||msg.clientId===cid)return;let d=msg.data;
+    try{if(typeof d==='string')d=JSON.parse(d);if(JSON.stringify(d).length>8000)return;}catch(e){return}
+    if(d&&d.t==='state'&&!String(msg.clientId||'').startsWith(d.side+'-'))return; handleMsg(d);});
+  await ach.presence.subscribe(pm=>{if(me!==ably)return;if(pm.action==='enter'&&pm.data&&pm.data.role===other()&&pm.clientId!==cid){lastSent='';sendState(true);}checkPresence();});
+  await ach.presence.enter({role:ROLE,ver:MP_VER});
+  try{localStorage.setItem('zwmp-sessie',name)}catch(e){}
+  checkPresence();}
+async function checkPresence(){if(!ach||MODE!=='ably')return;let mem;try{mem=await ach.presence.get();}catch(e){return}
+  const cid=ably.auth.clientId,others=mem.filter(m=>m.clientId!==cid),role=m=>m.data&&m.data.role;
+  if(others.some(m=>role(m)===ROLE)){setConn('lost',`Er zit al een ${NAME[ROLE]} in sessie ${sessName}. Kies een andere sessienaam of de andere rol.`);return;}
+  const peer=others.find(m=>role(m)===other());
+  if(peer){if(conn!=='on'){setConn('on');lastSent='';sendState(true);}}
+  else if(conn==='on'||conn==='stil')lost(`De ${NAME[other()]} heeft sessie ${sessName} verlaten. Zodra hij terugkomt, koppelt de sim vanzelf weer.`);
+  else setConn('wait',`Verbonden met sessie ${sessName}. Wacht tot de ${NAME[other()]} dezelfde sessienaam invult…`);}
 
 /* --- schermen --- */
 const PILL={idle:['NIET GEKOPPELD','pill'],wait:['KOPPELEN…','pill warn'],on:['GEKOPPELD','pill ok'],stil:['VERBINDING HAPERT','pill warn'],lost:['VERBINDING VERBROKEN','pill bad']};
-function setConn(c,note){conn=c;connNote=note||'';renderMp();
+function setConn(c,note){conn=c;connNote=note||'';renderMp();if(MODE==='ably'&&$('sSt'))st('sSt',connNote,c==='lost'?'bad':c==='on'?'ok':'warn');
   if(c==='on'&&$('mp').open){show('stOn');}}
 function renderMp(){document.body.classList.toggle('role-as',ROLE==='as');document.body.classList.toggle('role-cct',ROLE==='cct');
   $('mpRole').textContent='ROL · '+(ROLE==='solo'?'SOLO':NAME[ROLE].toUpperCase());
@@ -893,34 +949,44 @@ function renderMp(){document.body.classList.toggle('role-as',ROLE==='as');docume
     $('peerTxt').textContent=(connNote?connNote+' ':'')+(conn==='on'||conn==='stil'?`Deze kant wordt bediend door de andere speler. Wat er daar is ingesteld, zie je alleen terug in de zendweg${ROLE==='as'?' en op de spectrum analyzer':''}.`
       :`Koppel met de ${NAME[o]}-speler om samen een link op te bouwen. Zonder koppeling zendt de ${NAME[o]} niet.`);
     $('peerOpen').textContent=conn==='on'||conn==='stil'?'Verbinding':'Koppelen';}
-  $('onTxt').textContent=ROLE==='solo'?'':`Je bent gekoppeld als ${NAME[ROLE]}. De ${NAME[other()]} wordt bediend door de andere speler.${ROLE==='as'?' Jij kiest de transponder.':' Het grondstation kiest de transponder.'}`;}
+  $('onTxt').textContent=ROLE==='solo'?'':`${MODE==='ably'?`Sessie ${sessName}. `:''}Je bent gekoppeld als ${NAME[ROLE]}. De ${NAME[other()]} wordt bediend door de andere speler.${ROLE==='as'?' Jij kiest de transponder.':' Het grondstation kiest de transponder.'}`;}
 function show(id){for(const s of document.querySelectorAll('.mpsec'))s.hidden=s.id!==id;}
 function st(id,txt,cls=''){const el=$(id);el.textContent=txt;el.className='mpst '+cls;}
-function openMp(){if(conn==='on'||conn==='stil')show('stOn');else show(ROLE==='as'?'stHost':ROLE==='cct'?'stJoin':'stRole');if(!$('mp').open)$('mp').showModal();}
+function openMp(){if(conn==='on'||conn==='stil')show('stOn');else show(ROLE==='solo'?'stRole':MODE==='p2p'?(ROLE==='as'?'stHost':'stJoin'):'stSess');if(!$('mp').open)$('mp').showModal();}
 function copy(btn,ta){const v=ta.value;const ok=()=>{const t=btn.textContent;btn.textContent='Gekopieerd';setTimeout(()=>btn.textContent=t,1600);};
   const fb=()=>{ta.focus();ta.select();try{document.execCommand('copy')&&ok()}catch(e){}};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(v).then(ok,fb);else fb();}
 
-function chooseRole(r){if(r!==ROLE){if(dc)send({t:'bye'});closePeer();conn='idle';connNote='';
+function chooseRole(r){if(r!==ROLE){if(MODE==='p2p'&&dc)send({t:'bye'});closePeer();ablyClose();MODE=null;conn='idle';connNote='';
     if(ROLE!=='solo'){S[other()].tx.on=false;}
     ROLE=r;for(const id of ['hOffer','hAnswer','jOffer','jAnswer'])$(id).value='';
     $('hCopy').disabled=$('hConnect').disabled=$('jCopy').disabled=true;$('hLen').textContent='';st('hSt','');st('jSt','');
     applying=true;update();applying=false;}
   if(r==='solo'){$('mp').close();return;}
-  show(r==='as'?'stHost':'stJoin');}
+  sessUi();show('stSess');}
 for(const b of document.querySelectorAll('.role'))b.onclick=()=>chooseRole(b.dataset.role);
 for(const b of document.querySelectorAll('[data-back]'))b.onclick=()=>show('stRole');
 for(const b of document.querySelectorAll('[data-close]'))b.onclick=()=>$('mp').close();
 $('mpOpen').onclick=openMp;$('peerOpen').onclick=openMp;
-$('mpDrop').onclick=()=>{send({t:'bye'});closePeer();lost('Je hebt de verbinding verbroken.');show(ROLE==='as'?'stHost':'stJoin');};
+$('mpDrop').onclick=()=>{if(MODE==='p2p'){send({t:'bye'});closePeer();}else ablyClose();const m=MODE;MODE=null;lost('Je hebt de verbinding verbroken.');show(m==='p2p'?(ROLE==='as'?'stHost':'stJoin'):'stSess');};
+function sessUi(){$('sTitle').innerHTML=`${NAME[ROLE]} · <span>sessie</span>`;try{const v=localStorage.getItem('zwmp-sessie');if(v&&!$('sName').value)$('sName').value=v;}catch(e){}st('sSt',connNote&&conn!=='idle'?connNote:'');}
+$('sGo').onclick=async()=>{const name=$('sName').value.trim().replace(/\s+/g,'-'),pw=$('sPw').value;
+  if(!/^[A-Za-z0-9_.\-]{2,40}$/.test(name)){st('sSt','Gebruik voor de sessienaam 2 tot 40 letters, cijfers of streepjes, bijvoorbeeld LES-3A.','bad');return;}
+  $('sGo').disabled=true;st('sSt','Verbinden met de relay…','warn');
+  try{await ablyConnect(name,pw);}catch(e){MODE=null;setConn('idle');st('sSt',e.message==='load'?'De relay-software kan niet worden geladen. Controleer of de pagina via internet is geopend.':'Verbinden met de relay is mislukt. Probeer het opnieuw.','bad');}
+  $('sGo').disabled=false;};
+$('sName').addEventListener('keydown',e=>{if(e.key==='Enter')$('sGo').click();});
+$('sPw').addEventListener('keydown',e=>{if(e.key==='Enter')$('sGo').click();});
+$('sManual').onclick=()=>show(ROLE==='as'?'stHost':'stJoin');
+for(const b of document.querySelectorAll('[data-sess]'))b.onclick=()=>{sessUi();show('stSess');};
 
 /* grondstation: aanbod maken, antwoord verwerken */
-$('hMake').onclick=async()=>{$('hMake').disabled=true;st('hSt','Sessiecode maken…','warn');setConn('wait');
+$('hMake').onclick=async()=>{ablyClose();MODE='p2p';$('hMake').disabled=true;st('hSt','Sessiecode maken…','warn');setConn('wait');
   try{const p=newPeer();wire(p.createDataChannel('zendweg',{ordered:true}));
     await p.setLocalDescription(await p.createOffer());await gather(p);
     const code=await encode('O',p.localDescription.sdp);$('hOffer').value=code;$('hLen').textContent=code.length+' tekens';
     $('hCopy').disabled=false;$('hConnect').disabled=false;st('hSt','Stuur de sessiecode naar de CCT200 en wacht op de antwoordcode.','warn');}
-  catch(e){st('hSt','Kon geen sessie starten in deze browser.','bad');setConn('idle');}
+  catch(e){st('hSt',typeof RTCPeerConnection==='undefined'||/RTCPeer|not supported|disabled/i.test(String(e))?'WebRTC staat uit in deze browser, wat in werkomgevingen vaak zo is. Koppel via een sessienaam.':'Kon geen sessie starten in deze browser. Koppel via een sessienaam.','bad');setConn('idle');}
   $('hMake').disabled=false;};
 $('hCopy').onclick=()=>copy($('hCopy'),$('hOffer'));
 $('hConnect').onclick=async()=>{if(!pc){st('hSt','Maak eerst een sessiecode.','bad');return;}
@@ -931,7 +997,7 @@ $('hConnect').onclick=async()=>{if(!pc){st('hSt','Maak eerst een sessiecode.','b
   catch(e){st('hSt',e.message&&/format|kreeg|browser/.test(e.message)?codeErr(e):'Deze antwoordcode past niet bij deze sessie. Maak zo nodig een nieuwe sessiecode.','bad');}};
 
 /* CCT200: aanbod verwerken, antwoord maken */
-$('jMake').onclick=async()=>{$('jMake').disabled=true;
+$('jMake').onclick=async()=>{ablyClose();MODE='p2p';$('jMake').disabled=true;
   try{const sdp=await decode('O',$('jOffer').value);st('jSt','Antwoordcode maken…','warn');setConn('wait');
     const p=newPeer();p.ondatachannel=e=>wire(e.channel);
     await p.setRemoteDescription({type:'offer',sdp});await p.setLocalDescription(await p.createAnswer());await gather(p);
@@ -941,7 +1007,7 @@ $('jMake').onclick=async()=>{$('jMake').disabled=true;
   catch(e){st('jSt',codeErr(e),'bad');if(conn==='wait')setConn('idle');}
   $('jMake').disabled=false;};
 $('jCopy').onclick=()=>copy($('jCopy'),$('jAnswer'));
-window.addEventListener('pagehide',()=>send({t:'bye'}));
+window.addEventListener('pagehide',()=>{if(MODE==='p2p')send({t:'bye'});else ablyClose();});
 
 /* elke lokale wijziging gaat als volledige status naar de andere speler */
 const _update=update;
