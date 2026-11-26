@@ -49,6 +49,11 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 select{font:500 13px var(--f-mono);background:var(--panel2);color:var(--fg);border:1px solid var(--rule);border-radius:4px;padding:5px 6px;max-width:100%}
 select option:disabled{color:#4a5a60}
 .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.wxgrp{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;align-items:center}
+.chip.wx{gap:6px;padding:3px 10px}
+.chip.wx select{font-size:11px;padding:1px 4px}
+.chip.wx em{font-style:normal;font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:0;text-transform:none}
+.chip.wx b{color:var(--fg)}
 .chip{display:inline-flex;align-items:center;gap:8px;font:600 12px var(--f-display);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--rule);border-radius:999px;padding:3px 12px 3px 8px;color:var(--muted)}
 .chip i{width:14px;height:3px;border-radius:2px;display:inline-block}
 .chip b{font-weight:600}
@@ -118,6 +123,9 @@ legend{font:600 13px var(--f-display);letter-spacing:.14em;text-transform:upperc
 .spec{position:relative;height:190px;background:var(--bg);border:1px solid var(--rule);border-radius:4px}
 .spec canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .foot{color:var(--muted);font-size:12px;line-height:1.55;margin:0;max-width:130ch}
+.foot summary{cursor:pointer;font-family:var(--f-display);text-transform:uppercase;letter-spacing:.12em;font-size:12px}
+.foot summary:hover{color:var(--fg)}
+.foot p{margin:8px 0 0}
 @media (max-width:640px){.tp{top:6px;padding:3px 4px 3px 8px}.tp span{display:none}select{font-size:12px}}
 
 /* ---------- multiplayer ---------- */
@@ -176,7 +184,7 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
 
 <div class="app">
   <header>
-    <div class="brandrow"><div class="bf" title="BurgFunk"><svg class="bf-mark" viewBox="0 0 120 200" aria-hidden="true" focusable="false"><defs><linearGradient id="bfA" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#ffd58c"/><stop offset=".55" stop-color="#ffb547"/><stop offset="1" stop-color="#e48f25"/></linearGradient><filter id="bfG" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><ellipse cx="60" cy="100" rx="46" ry="78" fill="#0d1518"/><g stroke="#5fd0e6" stroke-width="1.6" opacity=".8"><line x1="111.0" y1="100.0" x2="117.0" y2="100.0"/><line x1="104.2" y1="141.5" x2="109.4" y2="144.5"/><line x1="85.5" y1="171.9" x2="88.5" y2="177.1"/><line x1="60.0" y1="183.0" x2="60.0" y2="189.0"/><line x1="34.5" y1="171.9" x2="31.5" y2="177.1"/><line x1="15.8" y1="141.5" x2="10.6" y2="144.5"/><line x1="9.0" y1="100.0" x2="3.0" y2="100.0"/><line x1="15.8" y1="58.5" x2="10.6" y2="55.5"/><line x1="34.5" y1="28.1" x2="31.5" y2="22.9"/><line x1="60.0" y1="17.0" x2="60.0" y2="11.0"/><line x1="85.5" y1="28.1" x2="88.5" y2="22.9"/><line x1="104.2" y1="58.5" x2="109.4" y2="55.5"/></g><ellipse cx="60" cy="100" rx="46" ry="78" fill="none" stroke="#5fd0e6" stroke-width="3" filter="url(#bfG)"/><ellipse cx="60" cy="100" rx="41" ry="73" fill="none" stroke="#5fd0e6" stroke-width="1" opacity=".4"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="url(#bfA)" filter="url(#bfG)"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="none" stroke="#ffe2ad" stroke-width="1" stroke-linejoin="round"/></svg><span class="bf-name">Burg<b>Funk</b></span></div><h1>Zendweg <span>Multiplayer</span> <small class="ver mono">v1.2</small></h1></div>
+    <div class="brandrow"><div class="bf" title="BurgFunk"><svg class="bf-mark" viewBox="0 0 120 200" aria-hidden="true" focusable="false"><defs><linearGradient id="bfA" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#ffd58c"/><stop offset=".55" stop-color="#ffb547"/><stop offset="1" stop-color="#e48f25"/></linearGradient><filter id="bfG" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><ellipse cx="60" cy="100" rx="46" ry="78" fill="#0d1518"/><g stroke="#5fd0e6" stroke-width="1.6" opacity=".8"><line x1="111.0" y1="100.0" x2="117.0" y2="100.0"/><line x1="104.2" y1="141.5" x2="109.4" y2="144.5"/><line x1="85.5" y1="171.9" x2="88.5" y2="177.1"/><line x1="60.0" y1="183.0" x2="60.0" y2="189.0"/><line x1="34.5" y1="171.9" x2="31.5" y2="177.1"/><line x1="15.8" y1="141.5" x2="10.6" y2="144.5"/><line x1="9.0" y1="100.0" x2="3.0" y2="100.0"/><line x1="15.8" y1="58.5" x2="10.6" y2="55.5"/><line x1="34.5" y1="28.1" x2="31.5" y2="22.9"/><line x1="60.0" y1="17.0" x2="60.0" y2="11.0"/><line x1="85.5" y1="28.1" x2="88.5" y2="22.9"/><line x1="104.2" y1="58.5" x2="109.4" y2="55.5"/></g><ellipse cx="60" cy="100" rx="46" ry="78" fill="none" stroke="#5fd0e6" stroke-width="3" filter="url(#bfG)"/><ellipse cx="60" cy="100" rx="41" ry="73" fill="none" stroke="#5fd0e6" stroke-width="1" opacity=".4"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="url(#bfA)" filter="url(#bfG)"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="none" stroke="#ffe2ad" stroke-width="1" stroke-linejoin="round"/></svg><span class="bf-name">Burg<b>Funk</b></span></div><h1>Zendweg <span>Multiplayer</span> <small class="ver mono">v1.3</small></h1></div>
     <div class="mpbar">
       <span class="rolechip mono" id="mpRole">ROL · —</span>
       <span class="pill" id="mpConn">NIET GEKOPPELD</span>
@@ -187,6 +195,7 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
   <section class="panel p-zw" aria-label="Zendweg">
     <div class="lbl"><span>Zendweg · SES-4 Ku</span>
       <div class="zwctl">
+        <label class="chk" id="wxManLbl"><input type="checkbox" id="wxMan"> Weer handmatig</label>
         <label class="chk"><input type="checkbox" id="cause" checked> Toon foutoorzaak</label>
         <button class="btn" id="pause" type="button">Pauze</button>
       </div>
@@ -200,6 +209,7 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
     <div class="chips">
       <span class="chip" id="chipOut"><i style="background:var(--out)"></i>Outbound <b>—</b></span>
       <span class="chip" id="chipIn"><i style="background:var(--in)"></i>Inbound <b>—</b></span>
+      <span class="wxgrp" aria-label="Weer"><span class="chip wx" id="wxAsChip">Weer GS <b id="wxAsName"></b><select id="wxAsSel" hidden aria-label="Weer grondstation"></select><em id="wxAsDb"></em></span><span class="chip wx" id="wxCctChip">Weer CCT200 <b id="wxCctName"></b><select id="wxCctSel" hidden aria-label="Weer CCT200"></select><em id="wxCctDb"></em></span><span class="chip wx bad" id="wxStormChip" hidden>Ruimtestorm <em id="wxStormDb"></em></span><label class="chk" id="wxStormBox" hidden><input type="checkbox" id="wxStormChk"> Ruimtestorm</label></span>
     </div>
   </section>
 
@@ -211,7 +221,7 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
   </section>
   <div class="units" id="units"></div>
 
-  <p class="foot">Frequentieplan: de uplink van het grondstation is de Tx L-band plus de BUC-LO van 12.800 MHz (BUC-band 13.750–14.500 MHz). De satelliet verlaagt met de translatie van de gekozen transponder. De LNB in het grondstation zet de downlink om met LO 10.000 MHz (Ku laag, 10.700–11.700 MHz) of 10.750 MHz (Ku hoog, 11.700–12.750 MHz) en heeft een vaste drift van +2,7 kHz; de CCT200 rekent zelf om en heeft −1,4 kHz drift. De demod lockt als de carrier binnen het vaste zoekbereik van ±30 kHz valt en modulatie, FEC en data rate gelijk zijn. Beide ontvangers zien ook hun eigen carrier terug (loopback). De spectrum analyzer staat in het grondstation achter de LNB en toont de Ku-frequentie; de center volgt de downlink van de CCT200 en de gele markering is de afstemming van de demod, teruggerekend naar Ku. Modcods, data-ratebereiken en Eb/No-drempels komen uit het DMD2050E-datasheet (gegarandeerde Eb/No bij BER 10⁻⁷); 8PSK LDPC staat daar niet in de prestatietabel en is geschat. Onder de drempel lockt de demod met bitfouten, ruim 1 dB eronder niet meer. De Eb/No zelf is een indicatief model met een vaste linkwinst per richting en overdrive boven −10 dBm modemuitgang. Symbol rate = data rate / bandbreedte-efficiëntie, bezette bandbreedte met roll-off 0,35. Het grondstation kan in CW (ongemoduleerd) zenden: een zuivere draaggolf zonder data, die op de spectrum analyzer als smalle lijn verschijnt. Data rate, modulatie en FEC doen dan niet mee en geen demod lockt. De CCT200 start altijd in CW: CW → Confirm zet een draaggolf aan, Modulate → Confirm schakelt over op data, Abort stopt het zenden. Reset zet de sim-standaardwaarden (Tx mode normaal, carrier uit, −25 dBm). Multiplayer: elke speler stuurt alleen de instellingen van zijn eigen modem, en beide schermen rekenen daarmee dezelfde link door. Het grondstation kiest de transponder. Valt de verbinding weg, dan stopt de carrier van de andere kant. De koppeling loopt via de Ably-relay over gewoon HTTPS, zodat hij ook werkt in getunnelde werkomgevingen; de berichten zijn versleuteld met een sleutel die uit sessienaam en wachtwoord wordt afgeleid. Handmatig koppelen met codes maakt een directe WebRTC-verbinding en werkt alleen waar WebRTC aanstaat.</p>
+  <details class="foot"><summary>Toelichting bij het model</summary><p>Frequentieplan: de uplink van het grondstation is de Tx L-band plus de BUC-LO van 12.800 MHz (BUC-band 13.750–14.500 MHz). De satelliet verlaagt met de translatie van de gekozen transponder. De LNB in het grondstation zet de downlink om met LO 10.000 MHz (Ku laag, 10.700–11.700 MHz) of 10.750 MHz (Ku hoog, 11.700–12.750 MHz) en heeft een vaste drift van +2,7 kHz; de CCT200 rekent zelf om en heeft −1,4 kHz drift. De demod lockt als de carrier binnen het vaste zoekbereik van ±30 kHz valt en modulatie, FEC en data rate gelijk zijn. Beide ontvangers zien ook hun eigen carrier terug (loopback). De spectrum analyzer staat in het grondstation achter de LNB en toont de Ku-frequentie; de center volgt de downlink van de CCT200 en de gele markering is de afstemming van de demod, teruggerekend naar Ku. Modcods, data-ratebereiken en Eb/No-drempels komen uit het DMD2050E-datasheet (gegarandeerde Eb/No bij BER 10⁻⁷); 8PSK LDPC staat daar niet in de prestatietabel en is geschat. Onder de drempel lockt de demod met bitfouten, ruim 1 dB eronder niet meer. De Eb/No zelf is een indicatief model met een vaste linkwinst per richting en overdrive boven −10 dBm modemuitgang. Symbol rate = data rate / bandbreedte-efficiëntie, bezette bandbreedte met roll-off 0,35. Het grondstation kan in CW (ongemoduleerd) zenden: een zuivere draaggolf zonder data, die op de spectrum analyzer als smalle lijn verschijnt. Data rate, modulatie en FEC doen dan niet mee en geen demod lockt. De CCT200 start altijd in CW: CW → Confirm zet een draaggolf aan, Modulate → Confirm schakelt over op data, Abort stopt het zenden. Reset zet de sim-standaardwaarden (Tx mode normaal, carrier uit, −25 dBm). Multiplayer: elke speler stuurt alleen de instellingen van zijn eigen modem, en beide schermen rekenen daarmee dezelfde link door. Het grondstation kiest de transponder. Valt de verbinding weg, dan stopt de carrier van de andere kant. De koppeling loopt via de Ably-relay over gewoon HTTPS, zodat hij ook werkt in getunnelde werkomgevingen; de berichten zijn versleuteld met een sleutel die uit sessienaam en wachtwoord wordt afgeleid. Handmatig koppelen met codes maakt een directe WebRTC-verbinding en werkt alleen waar WebRTC aanstaat. Weer: elke locatie heeft een eigen weer (helder, bewolkt, motregen, regen, zware regen of onweersbui). Regen dempt de uplink vanaf die locatie (Ku 14 GHz) volledig en de downlink naar die locatie voor 75 %, plus de extra ruis die de natte atmosfeer in de ontvanger brengt; bij zware regen en onweer schommelt de demping. Zonder handmatige keuze verandert het weer per locatie willekeurig om de twee à vijf minuten, en af en toe trekt er een ruimtestorm over die beide richtingen met scintillatie en korte drop-outs treft. Die stormeffecten zijn voor de oefening aangezet: op Ku-band naar een geostationaire satelliet zijn ze in werkelijkheid meestal klein. Het grondstation bepaalt het weer en geeft het door aan de CCT200.</p></details>
 </div>
 
 <dialog class="mp" id="mp" aria-labelledby="mpTitle">
@@ -439,8 +449,8 @@ function carrier(u){const t=S[u].tx,cw=t.mode==='cw',m=cw?null:mcOf(t.mod,t.fec)
   const Rs=m?t.rate/m.bw:null;
   return {u,cw,on:t.on,err,short,bucErr,tx:t.on&&!err&&!bucErr,up,dl,kuOk:dl>=KU_DL_MIN&&dl<=KU_DL_MAX,
     m,mod:t.mod,fec:t.fec,rate:t.rate,pwr:t.pwr,Rs,occ:Rs?Rs*1.35:null,over:t.pwr>-10};}
-const ebno=(c,rx)=>KLINK[c.u][rx]+effP(c.pwr)-10*Math.log10(c.rate*1000);
-const cn0=(c,rx)=>KLINK[c.u][rx]+effP(c.pwr);
+const ebno=(c,rx)=>KLINK[c.u][rx]+effP(c.pwr)-10*Math.log10(c.rate*1000)-wxLoss(c.u,rx);
+const cn0=(c,rx)=>KLINK[c.u][rx]+effP(c.pwr)-wxLoss(c.u,rx);
 function evalPair(rxU,c){const r=S[rxU].rx;
   if(!c.tx)return {st:'nocarrier'};
   if(!c.kuOk)return {st:'lost'};
@@ -479,7 +489,7 @@ function compute(){
     else if(c.cw&&(pf.st==='cw')){o.down='cw';o.cw=true;o.rxWhy=WHY.cw;}
     else if(isLock(pf)){o.down=pf.st==='errors'?'soft':'ok';o.lock=true;o.rxWhy=pf.st==='errors'?WHY.errors:null;}
     else{o.down=(pf.st==='freq'||pf.st==='lnb')?'fade':'noise';
-      o.rxWhy=rx[dst].locked&&rx[dst].locked.src===dst?'Rx staat op eigen carrier (loopback)':WHY[pf.st];}
+      o.rxWhy=rx[dst].locked&&rx[dst].locked.src===dst?'Rx staat op eigen carrier (loopback)':(pf.st==='ebno'&&wxLoss(src,dst)>1?(S.wx.storm&&stormLoss()>upFade(src)+downFade(dst)?'Eb/No te laag · ruimtestorm':'Eb/No te laag · regenfading'):WHY[pf.st]);}
     dir[d]=o;}
   R={car,rx,pair,dir};
   const now=performance.now();
@@ -721,7 +731,7 @@ function draw(t){
   cx.fillStyle=C.panel2;cx.fillRect(0,0,VW,VH);
   cx.fillStyle='rgba(212,226,228,.22)';for(const s of STARS){cx.fillRect(s.x,s.y,1.2,1.2);}
   floor();
-  drawSat(t);drawGS();drawCCT();scan(t);
+  drawSat(t);drawGS();drawCCT();scan(t);drawWx(t);
   text('OUTBOUND · OUTROUTE',500,112,14,C.out,'center');
   text('INBOUND · INROUTE',500,266,14,C.in,'center');
   const DIRS=[['out','as',C.out],['in','cct',C.in]];
@@ -801,8 +811,95 @@ function saInfo(){const L=LNB[S.as.rx.lnb],cf=R.car.cct.dl,c=R.car.cct;
     (inBand?`De SA hangt achter de LNB, dus alleen carriers binnen de gekozen LNB-band zijn zichtbaar.`:`Deze frequentie valt buiten de gekozen LNB-band: de SA ziet hier alleen ruis.`)+
     (c.tx?'':' De CCT200 zendt nu niet uit.');}
 
+/* ================= WEER EN RUIMTESTORM ================= */
+const WXT=[
+  {k:'helder',  n:'Helder',     a:0,   w:.30},
+  {k:'bewolkt', n:'Bewolkt',    a:.3,  w:.28},
+  {k:'motregen',n:'Motregen',   a:1.0, w:.16},
+  {k:'regen',   n:'Regen',      a:2.8, w:.14},
+  {k:'zwaar',   n:'Zware regen',a:6.5, w:.08},
+  {k:'onweer',  n:'Onweersbui', a:10,  w:.04, fl:3.5}];
+const WXI=Object.fromEntries(WXT.map((w,i)=>[w.k,i]));
+const LOCN={as:'Grondstation',cct:'CCT200'};
+const pickWx=()=>{let r=Math.random();for(const w of WXT){if((r-=w.w)<=0)return w.k;}return 'helder';};
+S.wx={manual:false,as:pickWx(),cct:pickWx(),storm:false,stormEnd:0,seed:(Math.random()*1e9)|0};
+
+/* deterministische ruis op de klok, zodat beide schermen dezelfde fading zien */
+const hash=(a,b)=>{let h=(a*374761393+b*668265263)|0;h=(h^(h>>>13))*1274126177|0;return((h^(h>>>16))>>>0)/4294967296;};
+function vnoise(seed,x){const i=Math.floor(x),f=x-i,u=f*f*(3-2*f);return hash(seed,i)*(1-u)+hash(seed,i+1)*u;}
+const nowS=()=>Date.now()/1000;
+function upFade(loc,t=nowS()){const w=WXT[WXI[S.wx[loc]]],sd=S.wx.seed+(loc==='as'?11:23);if(!w.a)return 0;
+  let a=w.a*(0.85+0.3*vnoise(sd,t/18));if(w.fl)a+=w.fl*(vnoise(sd+5,t/4)-0.5)*2;return Math.max(0,a);}
+function downFade(loc,t=nowS()){const a=0.75*upFade(loc,t);return a+10*Math.log10(1+270*(1-Math.pow(10,-a/10))/150);}
+function stormLoss(t=nowS()){if(!S.wx.storm)return 0;const sd=S.wx.seed+77,k=Math.floor(t/20),off=hash(sd,k)*16;
+  const burst=hash(sd+1,k)<0.55&&t-k*20>=off&&t-k*20<off+1.6?7:0;
+  return 1.5+1.6*(vnoise(sd+3,t*1.7)-0.5)*2+burst;}
+function wxLoss(tx,rx){return upFade(tx)+downFade(rx)+stormLoss();}
+const wxActive=()=>S.wx.storm||WXI[S.wx.as]>=2||WXI[S.wx.cct]>=2;
+
+/* willekeurig weerverloop: alleen het grondstation (of solo) bepaalt het, de CCT200 krijgt het mee */
+const wxAuth=()=>typeof ROLE==='undefined'||ROLE!=='cct';
+const wxNext={as:Date.now()+rnd(120,300)*1000,cct:Date.now()+rnd(120,300)*1000,storm:Date.now()+60000};
+function rnd(a,b){return a+Math.random()*(b-a);}
+function wxTick(){if(!wxAuth()||S.wx.manual)return;const now=Date.now();let ch=false;
+  for(const loc of ['as','cct'])if(now>wxNext[loc]){wxNext[loc]=now+rnd(120,300)*1000;
+    const i=WXI[S.wx[loc]],d=Math.random()<(i>=3?0.65:0.45)?-1:1,j=Math.min(WXT.length-1,Math.max(0,i+d));
+    if(j!==i){S.wx[loc]=WXT[j].k;ch=true;}}
+  if(S.wx.storm&&now>S.wx.stormEnd){S.wx.storm=false;ch=true;}
+  else if(!S.wx.storm&&now>wxNext.storm){wxNext.storm=now+60000;if(Math.random()<0.05){S.wx.storm=true;S.wx.stormEnd=now+rnd(120,360)*1000;ch=true;}}
+  if(ch)update();}
+setInterval(wxTick,5000);
+/* fading verandert continu: model regelmatig doorrekenen, zonder de status opnieuw te versturen */
+setInterval(()=>{if(!wxActive()||(typeof paused!=='undefined'&&paused))return;
+  const was=typeof applying!=='undefined'?applying:false;try{applying=true;}catch(e){}update();try{applying=was;}catch(e){}},500);
+
+function cleanWx(d){if(!d||typeof d!=='object')return null;const ok=k=>Object.prototype.hasOwnProperty.call(WXI,k);
+  return {manual:d.manual===true,as:ok(d.as)?d.as:'helder',cct:ok(d.cct)?d.cct:'helder',storm:d.storm===true,
+    stormEnd:typeof d.stormEnd==='number'&&isFinite(d.stormEnd)?d.stormEnd:0,seed:Number.isInteger(d.seed)?d.seed:1};}
+
+/* --- bediening en weergave --- */
+const wxOpts=WXT.map(w=>`<option value="${w.k}">${w.n}</option>`).join('');
+$('wxAsSel').innerHTML=wxOpts;$('wxCctSel').innerHTML=wxOpts;
+$('wxMan').onchange=e=>{S.wx.manual=e.target.checked;if(!S.wx.manual){wxNext.as=wxNext.cct=Date.now()+rnd(120,300)*1000;}update();};
+$('wxAsSel').onchange=e=>{S.wx.as=e.target.value;update();};
+$('wxCctSel').onchange=e=>{S.wx.cct=e.target.value;update();};
+$('wxStormChk').onchange=e=>{S.wx.storm=e.target.checked;S.wx.stormEnd=Date.now()+3600e3;update();};
+function renderWx(){const man=S.wx.manual,auth=wxAuth();
+  $('wxMan').checked=man;$('wxMan').disabled=!auth;$('wxManLbl').title=auth?'':'Het grondstation bepaalt het weer.';
+  for(const loc of ['as','cct']){const sel=$(loc==='as'?'wxAsSel':'wxCctSel'),i=WXI[S.wx[loc]];
+    sel.value=S.wx[loc];sel.hidden=!man;sel.disabled=!auth;
+    $(loc==='as'?'wxAsName':'wxCctName').textContent=WXT[i].n;$(loc==='as'?'wxAsName':'wxCctName').hidden=man;
+    $(loc==='as'?'wxAsDb':'wxCctDb').textContent=`↑${upFade(loc).toFixed(1)} ↓${downFade(loc).toFixed(1)} dB`;
+    $(loc==='as'?'wxAsChip':'wxCctChip').className='chip wx '+(i>=4?'bad':i>=3?'warn':'');}
+  $('wxStormChk').checked=S.wx.storm;$('wxStormChk').disabled=!auth;$('wxStormBox').hidden=!man;
+  const sc=$('wxStormChip');sc.hidden=!S.wx.storm;if(S.wx.storm)$('wxStormDb').textContent=`−${stormLoss().toFixed(1)} dB`;}
+
+/* --- weer in de zendweg tekenen --- */
+function cloud(x,y,s,dark){cx.save();cx.translate(x,y);cx.scale(s,s);
+  cx.fillStyle=dark?'rgba(10,16,19,.85)':'rgba(13,21,24,.55)';cx.beginPath();
+  for(const [dx,dy,r] of [[-30,6,18],[-10,-6,24],[16,-2,20],[34,8,15],[0,10,22]])cx.moveTo(dx+r,dy),cx.arc(dx,dy,r,0,Math.PI*2);cx.fill();
+  wstyle(dark?.7:.45,1.1);for(const [dx,dy,r,a0,a1] of [[-30,6,18,2.2,5.2],[-10,-6,24,3.4,6.0],[16,-2,20,3.9,6.6],[34,8,15,4.6,7.6]])ell(dx,dy,r,r,a0,a1);
+  line([P(-48,22),P(49,22)]);cx.restore();cx.shadowBlur=0;}
+function drawWx(t){const ts=t/1000;
+  for(const [loc,x] of [['as',150],['cct',862]]){const i=WXI[S.wx[loc]];if(i===0)continue;
+    const dark=i>=4,cy0=i>=4?150:162,n=[0,0,14,30,60,80][i];
+    if(n){cx.save();cx.strokeStyle=rgba(C.wire,i>=4?.42:.3);cx.lineWidth=1;cx.beginPath();
+      for(let k=0;k<n;k++){const h=hash(S.wx.seed+k,loc==='as'?1:2),sp=(i>=4?0.9:0.6),yy=((h*900+ts*260*sp)%280)+cy0+18,xx=x-70+((h*7919)%1)*140-(yy-cy0)*0.12;
+        cx.moveTo(xx,yy);cx.lineTo(xx-2.5,yy+(i>=4?14:9));}cx.stroke();cx.restore();}
+    cloud(x-28,cy0,1.05,dark);cloud(x+34,cy0+8,0.85,dark);if(i>=1&&i<=2)cloud(x+2,cy0-10,0.7,false);
+    if(i===5){const k=Math.floor(ts*2),flash=hash(S.wx.seed+9,k+(loc==='as'?0:999))<0.12&&(ts*2-k)<0.35;
+      if(flash){cx.save();cx.strokeStyle=C.trace;cx.shadowColor=C.trace;cx.shadowBlur=12;cx.lineWidth=2;
+        const bx=x-20+hash(k,3)*50;line([P(bx,cy0+20),P(bx-10,cy0+60),P(bx+6,cy0+66),P(bx-8,cy0+112)]);cx.restore();
+        cx.fillStyle=rgba(C.trace,.05);cx.fillRect(x-120,40,240,400);}}
+    text(`WEER · ${WXT[i].n}`,x,cy0-38,12,i>=4?C.bad:i>=3?C.trace:C.muted,'center','mono',500);}
+  if(S.wx.storm){cx.save();for(let b=0;b<3;b++){cx.beginPath();
+      for(let xx=0;xx<=VW;xx+=10){const yy=58+b*10+14*Math.sin(xx/90+ts*(0.6+b*0.2)+b)+6*Math.sin(xx/37-ts*1.3);xx?cx.lineTo(xx,yy):cx.moveTo(xx,yy);}
+      cx.strokeStyle=b===1?'rgba(180,140,255,.35)':'rgba(111,212,154,.28)';cx.lineWidth=6-b*1.5;cx.shadowColor=b===1?'#b48cff':'#6fd49a';cx.shadowBlur=14;cx.stroke();}
+    cx.restore();text('RUIMTESTORM · SCINTILLATIE',500,92,12,'#c9a8ff','center','mono',600);}
+}
+
 /* ================= MULTIPLAYER (handmatig koppelen, WebRTC) ================= */
-const MP_VER='1.2';
+const MP_VER='1.3';
 const ABLY_KEY='Rk0XpA.odnQFw:c5cSSJfvdcerMJHc4yLP5JptRDgTPOr6me6MLVc1Nms'; /* alleen publish/subscribe/presence op zwmp:* */
 const FECALL=Object.entries(FECS).flatMap(([g,rs])=>rs.map(r=>g+' '+r));
 const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'}]};
@@ -894,13 +991,14 @@ function handleMsg(m){if(!m||typeof m!=='object')return;lastSeen=performance.now
       peerOk=m.role===other();renderMp();}
     else if(m.t==='state'&&m.side===other()){applying=true;S[other()]=cleanSide(other(),m.data);
       if(other()==='as'&&typeof m.tp==='string'&&Object.prototype.hasOwnProperty.call(TP,m.tp)){S.tp=m.tp;$('tp').value=m.tp;}
+      if(other()==='as'){const w=cleanWx(m.wx);if(w)S.wx=w;}
       fill(other());update();applying=false;}
     else if(m.t==='bye'&&MODE==='p2p'){lost('De andere speler heeft de verbinding verbroken.');closePeer();}}
 const linkUp=()=>MODE==='ably'?!!(ach&&ably&&ably.connection.state==='connected'):!!(dc&&dc.readyState==='open');
 function send(o){if(MODE==='ably'){if(linkUp())ach.publish('m',o).catch(()=>{});}
   else if(dc&&dc.readyState==='open')try{dc.send(JSON.stringify(o))}catch(e){}}
 function sendState(force){if(ROLE==='solo'||!linkUp())return;
-  const msg={t:'state',side:ROLE,data:{tx:S[ROLE].tx,rx:S[ROLE].rx}};if(ROLE==='as')msg.tp=S.tp;
+  const msg={t:'state',side:ROLE,data:{tx:S[ROLE].tx,rx:S[ROLE].rx}};if(ROLE==='as'){msg.tp=S.tp;msg.wx=S.wx;}
   const j=JSON.stringify(msg);if(!force&&j===lastSent)return;
   if(MODE==='ably'&&!force){clearTimeout(sendT);sendT=setTimeout(()=>sendState(true),150);return;} /* bundelt snelle klikken */
   lastSent=j;send(msg);}
@@ -1018,7 +1116,7 @@ window.addEventListener('pagehide',()=>{if(MODE==='p2p')send({t:'bye'});else abl
 /* elke lokale wijziging gaat als volledige status naar de andere speler */
 const _update=update;
 /* sluit een tabblad netjes af: de ander krijgt 'bye' */
-update=function(){_update();if(!applying)sendState(false);};
+update=function(){_update();renderWx();if(!applying)sendState(false);};
 renderMp();
 setTimeout(()=>{if(!$('mp').open){show('stRole');$('mp').showModal();}},0);
 

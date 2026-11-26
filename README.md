@@ -25,3 +25,4 @@ Solo spelen kan ook: dan staan beide modems op één scherm.
 | v1.0 | Eerste multiplayerversie, gebouwd op SES-4 Zendweg Lab v1.8 |
 | v1.1 | Koppelen via sessienaam over de Ably-relay (HTTPS); handmatige codes blijven als reserve |
 | v1.2 | BurgFunk-logo in de kop en als favicon |
+| v1.3 | Weer per locatie (6 situaties) en ruimtestorm; willekeurig verloop of handmatig te kiezen |
