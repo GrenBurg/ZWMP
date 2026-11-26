@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RF Lab</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one-screen instrument panel — controls column left, time & frequency scopes centre, constellation + link budget right. Stacks below 1500px. Deliberately single dark scope theme. */
+:root{
+  --bg:#0a1013; --panel:#10191d; --panel2:#0d1518; --grid:#1c2b31; --rule:#24363d;
+  --fg:#d4e2e4; --muted:#7a9197; --trace:#ffb547; --trace-dim:rgba(255,181,71,.16);
+  --i:#5fd0e6; --q:#e68cc0; --ok:#6fd49a; --bad:#ff6b5e;
+  --bx:#5fa8ff; --bku:#b48cff; --bk:#4a5a60; --bka:#ff7a59;
+  --f-display:"Saira Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 24px}
+.app{display:grid;gap:14px;max-width:1240px;margin:0 auto;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"head" "ctrl" "wave" "const" "spec" "budget" "foot"}
+header{grid-area:head;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 24px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,3vw,38px);letter-spacing:.02em;margin:0;line-height:1;text-wrap:balance}
+h1 span{color:var(--trace)}
+.sub{color:var(--muted);margin:0;max-width:70ch}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;min-width:0;min-height:0;display:flex;flex-direction:column}
+.lbl{font-family:var(--f-display);font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.lbl b{color:var(--fg);font-weight:500}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.ctrl{grid-area:ctrl;gap:12px}
+.p-wave{grid-area:wave}.p-const{grid-area:const}.p-spec{grid-area:spec}.p-budget{grid-area:budget}
+.foot{grid-area:foot;color:var(--muted);font-size:12px;line-height:1.5;margin:0}
+
+.freqrow{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 18px}
+.freq{font-family:var(--f-mono);font-weight:600;font-size:clamp(34px,4vw,50px);line-height:1;color:var(--trace)}
+.freq small{font-size:.4em;color:var(--muted);margin-left:4px}
+.bandtag{font-family:var(--f-display);font-weight:700;font-size:24px;padding:1px 12px;border-radius:4px;color:#0a1013;line-height:1.2}
+.modcod{font-family:var(--f-mono);font-size:13px;border:1px solid var(--rule);border-radius:4px;padding:4px 10px;color:var(--fg)}
+.lam{color:var(--muted);font-family:var(--f-mono);display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.lam span{color:var(--fg)}
+.bandbar{height:28px;border-radius:4px;overflow:hidden;display:flex}
+.bandbar div{height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:700;font-size:14px;color:#0a1013;cursor:pointer;opacity:.55;transition:opacity .2s}
+.bandbar div.on{opacity:1}
+.bandbar div.k{color:var(--fg);cursor:default}
+input[type=range]{width:100%;accent-color:var(--trace);margin:0}
+.ticks{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:-4px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px 28px;padding-top:12px;border-top:1px solid var(--rule)}
+.field{display:grid;gap:6px;min-width:0}
+.field>span{color:var(--muted);font-size:12px;font-family:var(--f-display);text-transform:uppercase;letter-spacing:.1em;display:flex;justify-content:space-between;gap:8px}
+.field>span output{font-family:var(--f-mono);text-transform:none;letter-spacing:0;color:var(--trace);font-size:13px}
+.seg{display:flex;flex-wrap:wrap;border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+.seg button{background:var(--panel2);color:var(--muted);border:0;box-shadow:inset -1px 0 0 var(--rule),inset 0 -1px 0 var(--rule);font-family:var(--f-mono);font-size:13px;padding:7px 10px;cursor:pointer;flex:1 0 auto}
+.seg button:hover{color:var(--fg)}
+.seg button[aria-pressed=true]{background:var(--trace);color:#0a1013;font-weight:600}
+.seg.small{flex-wrap:nowrap}
+.seg.small button{padding:4px 8px;font-size:11px}
+.seg button:focus-visible,.btn:focus-visible,.bandbar div:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--i);outline-offset:2px}
+select{width:100%;background:var(--panel2);color:var(--trace);border:1px solid var(--rule);border-radius:5px;padding:7px 10px;font-family:var(--f-mono);font-size:14px;cursor:pointer}
+select.modem{color:var(--fg);font-size:15px;font-weight:600}
+option{background:var(--panel);color:var(--fg)}
+option:disabled{color:var(--muted)}
+.btn{background:transparent;color:var(--fg);border:1px solid var(--rule);border-radius:5px;padding:6px 12px;font-family:var(--f-body);cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.inline{display:flex;gap:12px;align-items:center}
+.hint{color:var(--muted);font-size:12px;margin:0;font-family:var(--f-mono)}
+.note{color:var(--muted);font-size:13px;line-height:1.5;margin:0;padding-top:12px;border-top:1px solid var(--rule)}
+
+.cv{position:relative;min-height:0;flex:1 1 auto}
+.cv canvas{position:absolute;inset:0;width:100%;height:100%;display:block;background:var(--panel2);border-radius:4px}
+.p-wave .cv{height:280px}.p-const .cv{aspect-ratio:1/1;height:auto;max-width:100%}.p-spec .cv{height:280px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0}
+dt{color:var(--muted);font-size:13px}
+dd{margin:0;text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+dd small{color:var(--muted)}
+dl hr{grid-column:1/-1;border:0;border-top:1px solid var(--rule);margin:3px 0;width:100%}
+.margin{font-weight:600;padding:1px 8px;border-radius:3px}
+.margin.ok{background:rgba(111,212,154,.15);color:var(--ok)}
+.margin.bad{background:rgba(255,107,94,.15);color:var(--bad)}
+
+h1 .back{font-size:15px;font-weight:500;color:var(--muted);text-decoration:none;text-transform:uppercase;letter-spacing:.08em;margin-left:14px;vertical-align:middle}
+h1 .back:hover{color:var(--fg)}
+.embed header{display:none}
+.embed .app{grid-template-areas:"ctrl" "wave" "const" "spec" "budget" "foot"}
+@media (min-width:1500px) and (min-height:760px){
+  .embed,.embed body{height:100%}
+  .embed body{padding-block:14px;overflow:hidden}
+  .embed .fields{grid-template-columns:minmax(0,1fr);gap:12px}
+  .embed .p-wave .cv,.embed .p-spec .cv,.embed .p-const .cv{height:auto;aspect-ratio:auto}
+  .embed .ctrl,.embed .p-budget{overflow:auto}
+  .embed .app{max-width:none;height:100%;grid-template-columns:clamp(360px,19vw,460px) minmax(0,1fr) clamp(420px,24vw,580px);grid-template-rows:minmax(0,1fr) minmax(0,1.05fr) auto;grid-template-areas:"ctrl wave const" "ctrl spec budget" "foot foot foot"}
+}
+@media (min-width:1500px) and (min-height:900px){
+  html,body{height:100%}
+  body{padding-block:18px;overflow:hidden}
+  .app{max-width:none;height:100%;
+    grid-template-columns:clamp(360px,19vw,460px) minmax(0,1fr) clamp(420px,24vw,580px);
+    grid-template-rows:auto minmax(0,1fr) minmax(0,1.05fr) auto;
+    grid-template-areas:"head head head" "ctrl wave const" "ctrl spec budget" "foot foot foot"}
+  .ctrl{overflow:auto}
+  .fields{grid-template-columns:minmax(0,1fr);gap:12px}
+  .p-wave .cv,.p-spec .cv,.p-const .cv{height:auto;aspect-ratio:auto}
+  .p-budget{overflow:auto}
+  .foot{font-size:11.5px}
+}
+@media (min-width:2200px) and (min-height:1200px){
+  body{font-size:15px}
+  dt{font-size:14px}
+  .fields{gap:16px}
+}
+</style>
+</head>
+<body>
+
+<script>try{if(window.self!==window.top)document.documentElement.classList.add("embed")}catch(e){document.documentElement.classList.add("embed")}</script>
+<div class="app">
+  <header>
+    <h1>RF <span>Lab</span> <a class="back" href="index.html">Zendweg Multiplayer</a></h1>
+    <p class="sub">Pick a modem, tune across X, Ku and Ka band, set modulation, FEC, data rate and EIRP, and watch the carrier, constellation and link margin respond.</p>
+  </header>
+
+  <section class="panel ctrl" aria-label="Tuning and link parameters">
+    <div class="freqrow">
+      <div class="freq mono" id="freqOut">14.00<small>GHz</small></div>
+      <div class="bandtag" id="bandTag">Ku</div>
+    </div>
+    <div class="lam"><div class="modcod" id="modcodTag">QPSK TPC 3/4</div><div>λ = <span id="lamOut">21.4</span> mm</div></div>
+    <div class="bandbar" id="bandbar" role="group" aria-label="Jump to band"></div>
+    <input type="range" id="freq" min="8" max="40" step="0.05" value="14" aria-label="Carrier frequency in GHz">
+    <div class="ticks mono"><span>8</span><span>12</span><span>18</span><span>27</span><span>40 GHz</span></div>
+
+    <div class="fields">
+      <label class="field" for="modem"><span>Modem</span>
+        <select id="modem" class="modem">
+          <option value="generic">Generic</option>
+          <option value="dmd2050e">Comtech EF Data DMD2050E</option>
+          <option value="slm5650a">Comtech EF Data SLM-5650A</option>
+        </select></label>
+      <div class="field"><span>Modulation</span><div class="seg" role="group" aria-label="Modulation" id="modSeg"></div></div>
+      <div class="field"><span>FEC</span><div class="seg" role="group" aria-label="FEC type" id="fecSeg"></div></div>
+      <div class="field"><span>Code rate</span><div class="seg" role="group" aria-label="Code rate" id="crSeg"></div></div>
+      <label class="field" for="rate"><span>Information data rate <output id="rateOut">2048 kbit/s</output></span>
+        <select id="rate"></select>
+        <p class="hint" id="rateHint"></p></label>
+      <label class="field" for="eirp"><span>Carrier EIRP <output id="eirpOut">35.0 dBW</output></span>
+        <input type="range" id="eirp" min="10" max="60" step="0.5" value="35"></label>
+      <div class="field"><span>Receive dish</span>
+        <div class="seg" role="group" aria-label="Dish diameter" id="dishSeg">
+          <button data-v="0.6">0.6 m</button><button data-v="1.2">1.2 m</button><button data-v="2.4">2.4 m</button><button data-v="4.5">4.5 m</button>
+        </div></div>
+      <div class="field"><span>Weather</span>
+        <div class="seg" role="group" aria-label="Weather" id="wxSeg">
+          <button data-v="0">clear sky</button><button data-v="0.35">light rain</button><button data-v="1">heavy rain</button>
+        </div></div>
+      <div class="field"><span>Animation speed</span>
+        <div class="inline"><input type="range" id="speed" min="0.2" max="4" step="0.1" value="1.4" aria-label="Animation speed"><button class="btn" id="pause" type="button">Pause</button></div></div>
+    </div>
+    <p class="note" id="bandNote"></p>
+  </section>
+
+  <section class="panel p-wave">
+    <div class="lbl"><span>Waveform · time domain</span><b class="mono" id="symInfo">2 bits/symbol</b></div>
+    <div class="cv"><canvas id="cWave"></canvas></div>
+    <div class="legend"><span><i style="background:var(--i)"></i>I (in-phase)</span><span><i style="background:var(--q)"></i>Q (quadrature)</span><span><i style="background:var(--trace)"></i>modulated carrier</span></div>
+  </section>
+
+  <section class="panel p-const">
+    <div class="lbl"><span>Constellation · I/Q</span><b class="mono" id="evmOut">EVM —</b></div>
+    <div class="cv"><canvas id="cConst"></canvas></div>
+    <div class="legend"><span>Bit labels per point · noise follows from the link budget</span></div>
+  </section>
+
+  <section class="panel p-spec">
+    <div class="lbl"><span>Spectrum around carrier</span>
+      <div class="seg small" role="group" aria-label="Spectrum span" id="spanSeg">
+        <button data-v="0">auto</button><button data-v="0.5">500 kHz</button><button data-v="2">2 MHz</button><button data-v="10">10 MHz</button><button data-v="50">50 MHz</button>
+      </div></div>
+    <div class="cv"><canvas id="cSpec"></canvas></div>
+    <div class="legend"><span><i style="background:var(--trace)"></i>carrier (RRC, roll-off 0.20)</span><span><i style="background:var(--muted)"></i>noise floor = 0 dB</span></div>
+  </section>
+
+  <section class="panel p-budget">
+    <div class="lbl"><span>Link budget · GEO downlink</span><b class="mono" id="budgetModem">—</b></div>
+    <dl>
+      <dt>Symbol rate</dt><dd id="rRs">—</dd>
+      <dt>Occupied bandwidth</dt><dd id="rBw">—</dd>
+      <dt>Spectral efficiency</dt><dd id="rEff">—</dd>
+      <dt>Mode data-rate range</dt><dd id="rRange">—</dd>
+      <hr>
+      <dt>EIRP</dt><dd id="rEirp">—</dd>
+      <dt>Free-space path loss</dt><dd id="rFspl">—</dd>
+      <dt>Atmosphere + rain</dt><dd id="rAtm">—</dd>
+      <dt>Receiver G/T</dt><dd id="rGt">—</dd>
+      <dt>C/N<sub>0</sub></dt><dd id="rCn0">—</dd>
+      <hr>
+      <dt>Received E<sub>s</sub>/N<sub>0</sub></dt><dd id="rEs">—</dd>
+      <dt>Received E<sub>b</sub>/N<sub>0</sub></dt><dd id="rEb">—</dd>
+      <dt>Required E<sub>b</sub>/N<sub>0</sub> @ 10⁻⁶</dt><dd id="rReqEb">—</dd>
+      <dt>Link margin</dt><dd><span class="margin" id="rMargin">—</span></dd>
+      <dt>Channel BER (pre-FEC)</dt><dd id="rBerRaw">—</dd>
+      <dt>BER after FEC</dt><dd id="rBerPost">—</dd>
+    </dl>
+  </section>
+
+  <p class="foot" id="foot">Model: Eₛ/N₀ = EIRP − FSPL − atmosphere/rain + G/T + 228.6 − 10·log(Rₛ), with Rₛ = data rate / spectral efficiency of the mode (bits per symbol × code rate, incl. Reed-Solomon overhead) and occupied bandwidth Rₛ·(1+α), α = 0.20. G/T assumes 65 % dish efficiency and 150 K; path 35 786 km (GEO). Modem modes, data-rate ranges and Eb/N₀ values come from the Comtech EF Data datasheets (DMD2050E, rev. 10/2016; SLM-5650A, rev. 3/2014): required Eb/N₀ is the guaranteed value at BER 10⁻⁶ (typical in brackets), and BER after FEC is interpolated between the datasheet points. Generic mode uses indicative values. Data rates are n × 64 kbit/s. Rain attenuation is a rough temperate-climate estimate. The waveform is scaled: a real symbol spans thousands of carrier cycles.</p>
+</div>
+
+<script>
+(function(){
+const BANDS=[
+  {id:"X",lo:8,hi:12,col:"--bx",center:10,
+   note:"X band (8–12 GHz): military satcom (around 7.25–8.4 GHz), maritime and air-traffic radar, deep-space telemetry. Barely affected by rain, which makes it the choice for robust links."},
+  {id:"Ku",lo:12,hi:18,col:"--bku",center:14,
+   note:"Ku band (12–18 GHz): direct-to-home satellite TV (10.7–12.75 GHz downlink), VSAT and satellite news gathering. Smaller dishes than C band, but rain fade becomes noticeable in heavy showers."},
+  {id:"K",lo:18,hi:27,col:"--bk",center:22.5,
+   note:"K band (18–27 GHz): sits between Ku and Ka. The water-vapour absorption line at 22.2 GHz makes it less suitable for long atmospheric paths."},
+  {id:"Ka",lo:27,hi:40,col:"--bka",center:30,
+   note:"Ka band (27–40 GHz): high-throughput satellites with spot beams, broadband internet and military satcom. Lots of bandwidth but strong rain attenuation; adaptive coding and modulation then steps down to a more robust MODCOD."}
+];
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const log10=Math.log10;
+
+/* ---------- modulations ---------- */
+const MODS={BPSK:{bits:1,name:"BPSK"},QPSK:{bits:2,name:"QPSK"},OQPSK:{bits:2,name:"OQPSK"},"8PSK":{bits:3,name:"8PSK"},
+  "8QAM":{bits:3,name:"8-QAM"},"16QAM":{bits:4,name:"16-QAM"},"16APSK":{bits:4,name:"16APSK"}};
+const MOD_ORDER=["BPSK","QPSK","OQPSK","8PSK","8QAM","16QAM","16APSK"];
+const FEC_ORDER=["None","Viterbi","Viterbi+RS","Sequential","Trellis","Trellis+RS","TPC","Turbo 4486","LDPC","LDPC LL","LDPC ULL"];
+
+/* ---------- modem mode tables (from datasheets) ----------
+   row: [modulations, FEC, code-rate label, spectral eff. (bit/sym), [[guaranteed, typical] per BER column], min kbps, max kbps] */
+function build(exps,rows){return rows.map(([mods,fec,cr,bw,p,min,max])=>({mods:mods.split("/"),fec,cr,bw,min,max,
+  pts:p?p.map((v,i)=>({eb:v[0],typ:v[1],l:exps[i]})):null}));}
+const DMD=build([-5,-6,-7,-8],[
+  ["BPSK/QPSK/OQPSK","None","1/1",0,null,2.4,20000],
+  ["BPSK","Viterbi","1/2",.5,[[5.5,5.1],[6.1,5.7],[6.7,6.2],[7.4,6.8]],2.4,14100],
+  ["QPSK","Viterbi","1/2",1,[[5.5,5.1],[6.1,5.7],[6.7,6.2],[7.4,6.8]],4.8,28300],
+  ["QPSK","Viterbi","3/4",1.5,[[6.8,6.3],[7.6,7.0],[8.3,7.7],[8.9,8.4]],7.2,42400],
+  ["QPSK","Viterbi","7/8",1.75,[[7.9,7.2],[8.6,7.9],[9.3,8.6],[10.2,9.4]],8.4,49500],
+  ["QPSK","Viterbi+RS","1/2",.92,[[3.8,3.4],[4.1,3.6],[4.2,3.8],[4.4,4.0]],4.8,25100],
+  ["QPSK","Viterbi+RS","3/4",1.38,[[5.4,4.7],[5.6,4.9],[5.8,5.1],[6.0,5.3]],7.2,37700],
+  ["QPSK","Viterbi+RS","7/8",1.61,[[6.5,6.0],[6.7,6.4],[6.9,6.7],[7.2,7.1]],7.8,44000],
+  ["QPSK","Sequential","1/2",1,[[5.6,5.1],[5.9,5.4],[6.3,5.8],[6.7,6.2]],4.8,2048],
+  ["QPSK","Sequential","3/4",1.5,[[6.1,5.6],[6.5,6.1],[7.0,6.5],[7.4,6.9]],7.2,2048],
+  ["QPSK","Sequential","7/8",1.75,[[6.9,6.4],[7.4,6.9],[7.9,7.4],[8.4,7.9]],8.4,2048],
+  ["8PSK","Trellis","2/3",2,[[8.2,6.4],[9.0,7.2],[9.8,8.1],[10.4,8.9]],9.6,52000],
+  ["8PSK","Trellis+RS","2/3",1.84,[[6.3,5.4],[6.5,5.6],[6.7,5.8],[6.9,6.1]],8.9,52000],
+  ["BPSK","TPC","5/16",.3125,[[2.5,2.3],[2.7,2.5],[2.9,2.7],[3.1,2.9]],2.4,3125],
+  ["BPSK","TPC","21/44",.477,[[2.7,2.4],[2.9,2.6],[3.1,2.8],[3.3,3.0]],2.4,4773],
+  ["QPSK/OQPSK","TPC","21/44",.955,[[2.7,2.4],[2.9,2.6],[3.1,2.8],[3.3,3.0]],4.3,9545],
+  ["QPSK/OQPSK","TPC","3/4",1.5,[[3.6,3.2],[3.8,3.4],[4.1,3.7],[4.4,4.0]],6.7,15000],
+  ["QPSK/OQPSK","TPC","7/8",1.75,[[4.2,3.9],[4.3,4.0],[4.4,4.1],[4.5,4.2]],7.8,17500],
+  ["8PSK","TPC","3/4",2.25,[[6.0,5.6],[6.3,5.8],[6.5,6.0],[6.7,6.3]],10,20000],
+  ["8PSK","TPC","7/8",2.63,[[6.9,6.5],[7.0,6.6],[7.1,6.7],[7.2,6.8]],11.6,20000],
+  ["16QAM","TPC","3/4",3,[[7.0,6.7],[7.4,7.1],[7.8,7.5],[8.2,7.9]],13.3,20000],
+  ["16QAM","TPC","7/8",3.5,[[8.0,7.6],[8.1,7.7],[8.2,7.8],[8.3,7.9]],15.5,20000],
+  ["BPSK","Turbo 4486","2/3",.656,[[2.6,2.2],[2.65,2.25],[2.7,2.3],[2.8,2.4]],64,19861],
+  ["BPSK","Turbo 4486","3/4",.737,[[3.1,2.7],[3.15,2.75],[3.2,2.8],[3.3,2.9]],64,22331],
+  ["BPSK","Turbo 4486","7/8",.86,[[4.2,3.8],[4.3,3.9],[4.4,4.0],[4.5,4.1]],64,26032],
+  ["BPSK","Turbo 4486","19/20",.933,[[5.9,5.5],[6.0,5.6],[6.2,5.7],[6.2,5.8]],64,28250],
+  ["QPSK","Turbo 4486","1/2",.982,[[1.8,1.4],[1.9,1.5],[2.0,1.6],[2.1,1.7]],64,29731],
+  ["QPSK","Turbo 4486","2/3",1.307,[[2.6,2.2],[2.7,2.3],[2.8,2.4],[2.9,2.5]],64,39561],
+  ["QPSK","Turbo 4486","3/4",1.464,[[3.4,3.0],[3.5,3.1],[3.6,3.2],[3.7,3.3]],64,44456],
+  ["QPSK","Turbo 4486","7/8",1.71,[[4.0,3.6],[4.1,3.7],[4.2,3.8],[4.3,3.9]],64,51784],
+  ["QPSK","Turbo 4486","19/20",1.856,[[5.9,5.5],[6.0,5.6],[6.1,5.7],[6.2,5.8]],64,52000],
+  ["8PSK","Turbo 4486","1/2",1.468,[[3.5,3.1],[3.6,3.2],[3.7,3.3],[3.9,3.5]],256,44456],
+  ["8PSK","Turbo 4486","2/3",1.953,[[5.0,4.6],[5.1,4.7],[5.2,4.8],[5.3,4.9]],256,52000],
+  ["8PSK","Turbo 4486","3/4",2.192,[[6.0,5.6],[6.1,5.7],[6.2,5.8],[6.3,5.9]],256,52000],
+  ["8PSK","Turbo 4486","7/8",2.551,[[7.2,6.8],[7.3,6.9],[7.5,7.1],[7.9,7.5]],256,52000],
+  ["8PSK","Turbo 4486","19/20",2.767,[[9.5,9.1],[9.6,9.2],[9.7,9.3],[9.8,9.4]],256,52000],
+  ["16APSK","Turbo 4486","1/2",1.953,[[4.7,4.3],[4.9,4.4],[4.9,4.5],[5.0,4.6]],256,52000],
+  ["16APSK","Turbo 4486","2/3",2.593,[[6.5,6.0],[6.6,6.1],[6.7,6.2],[6.7,6.3]],256,52000],
+  ["16APSK","Turbo 4486","3/4",2.91,[[7.4,7.0],[7.5,7.1],[7.6,7.3],[7.7,7.3]],256,52000],
+  ["16APSK","Turbo 4486","7/8",3.382,[[8.5,8.4],[8.7,8.5],[8.8,8.6],[8.9,8.7]],256,52000],
+  ["16APSK","Turbo 4486","19/20",3.67,[[10.5,10.2],[10.7,10.4],[10.8,10.5],[10.9,10.6]],256,52000],
+  ["BPSK","LDPC","1/2",.5,[[2.0,1.7],[2.1,1.8],[2.2,1.9],[2.3,2.0]],2.4,14100],
+  ["QPSK/OQPSK","LDPC","1/2",1,[[2.0,1.7],[2.1,1.8],[2.2,1.9],[2.3,2.0]],4.8,20000],
+  ["QPSK/OQPSK","LDPC","2/3",1.33,[[2.3,2.0],[2.4,2.1],[2.5,2.2],[2.6,2.3]],6.4,20000],
+  ["QPSK/OQPSK","LDPC","3/4",1.5,[[3.0,2.6],[3.1,2.7],[3.2,2.8],[3.3,3.0]],7.2,20000],
+  ["8QAM","LDPC","2/3",2,[[4.6,4.2],[4.7,4.3],[4.8,4.4],[4.9,4.5]],9.6,20000],
+  ["8QAM","LDPC","3/4",2.25,[[5.6,5.2],[5.7,5.3],[5.8,5.4],[5.9,5.5]],10.8,20000],
+  ["16QAM","LDPC","3/4",3,[[6.8,6.2],[6.9,6.4],[7.0,6.6],[7.1,6.8]],14.4,20000]
+]);
+const SLM=build([-6,-7,-8,-10],[
+  ["BPSK/QPSK/OQPSK","None","1/1",0,null,64,20000],
+  ["QPSK/OQPSK","Viterbi","1/2",1,[[6.1,5.7],[6.7,6.2],[7.2,6.6]],64,51840],
+  ["QPSK/OQPSK","Viterbi","3/4",1.5,[[7.5,6.9],[8.2,7.6],[8.8,8.3]],64,51840],
+  ["QPSK/OQPSK","Viterbi","7/8",1.75,[[8.6,7.9],[9.2,8.5],[10.2,9.4]],64,51840],
+  ["QPSK/OQPSK","Viterbi+RS","1/2",.92,[[4.1,3.6],[4.2,3.8],[4.4,4.0],[5.0,4.6]],64,51840],
+  ["QPSK/OQPSK","Viterbi+RS","3/4",1.38,[[5.6,4.9],[5.8,5.1],[6.0,5.3],[6.3,5.6]],64,51840],
+  ["QPSK","Sequential","1/2",1,[[5.0,4.5],[5.4,4.9],[5.8,5.3]],64,2500],
+  ["QPSK","Sequential","3/4",1.5,[[5.9,5.4],[6.4,5.9],[6.8,6.3]],64,3750],
+  ["QPSK","Sequential","7/8",1.75,[[7.3,6.8],[7.8,7.3],[8.4,7.9]],64,4375],
+  ["8PSK","Trellis","2/3",2,[[7.3,6.8],[8.1,7.6],[8.8,8.3]],256,51840],
+  ["8PSK","Trellis+RS","2/3",1.84,[[6.2,5.7],[6.5,6.0],[6.7,6.2],[7.3,6.8]],256,51840],
+  ["BPSK","TPC","5/16",.3125,[[2.5,2.0],[2.8,2.3],[3.1,2.6],[3.4,2.9]],64,20000],
+  ["BPSK","TPC","21/44",.477,[[3.3,2.8],[3.4,2.9],[3.5,3.0],[3.7,3.2]],64,30545],
+  ["QPSK","TPC","21/44",.955,[[3.3,2.8],[3.4,2.9],[3.5,3.0],[3.7,3.2]],64,61091],
+  ["QPSK","TPC","3/4",1.5,[[4.1,3.6],[4.3,3.8],[4.6,4.1],[5.5,5.0]],64,96000],
+  ["QPSK","TPC","7/8",1.75,[[4.5,4.0],[4.6,4.1],[4.7,4.2],[4.8,4.3]],64,112000],
+  ["8PSK","TPC","3/4",2.25,[[6.5,5.8],[6.9,6.0],[7.2,6.3],[7.8,7.3]],64,144000],
+  ["8PSK","TPC","7/8",2.625,[[7.1,6.6],[7.2,6.7],[7.3,6.8],[7.5,7.0]],64,155000],
+  ["16QAM","TPC","3/4",3,[[7.6,7.0],[7.95,7.3],[8.3,7.7],[9.0,8.5]],64,155000],
+  ["16QAM","TPC","7/8",3.5,[[8.2,7.7],[8.35,7.8],[8.5,7.9],[8.8,8.3]],64,155000],
+  ["BPSK","LDPC","1/2",.5,[[2.0,1.7],[2.1,1.8],[2.2,1.9],[2.3,2.0]],8,15000],
+  ["QPSK","LDPC","1/2",1,[[2.0,1.7],[2.1,1.8],[2.2,1.9],[2.3,2.0]],32,30000],
+  ["QPSK","LDPC","2/3",1.333,[[2.3,2.0],[2.4,2.1],[2.5,2.2],[2.6,2.3]],42.7,40000],
+  ["QPSK","LDPC","3/4",1.5,[[3.0,2.6],[3.1,2.7],[3.2,2.8],[3.3,3.0]],48,45000],
+  ["8QAM","LDPC","2/3",2,[[4.6,4.2],[4.7,4.3],[4.8,4.4],[4.9,4.5]],256,41000],
+  ["8QAM","LDPC","3/4",2.25,[[5.6,5.2],[5.7,5.3],[5.8,5.4],[5.9,5.5]],256,46000],
+  ["16QAM","LDPC","3/4",3,[[6.8,6.2],[6.9,6.4],[7.0,6.6],[7.1,6.8]],256,46000],
+  ["BPSK","LDPC LL","0.378",.378,[[1.9,1.6],[2.0,1.7],[2.1,1.8],[2.2,1.9]],8,5000],
+  ["BPSK","LDPC LL","0.451",.451,[[2.1,1.8],[2.2,1.8],[2.3,2.0],[2.4,2.1]],8,5000],
+  ["BPSK","LDPC LL","0.541",.541,[[2.2,1.9],[2.3,2.0],[2.4,2.1],[2.5,2.2]],8,5000],
+  ["QPSK","LDPC LL","1/2",1,[[2.3,2.0],[2.4,2.1],[2.5,2.2],[2.6,2.3]],32,5000],
+  ["QPSK","LDPC LL","2/3",1.333,[[3.1,2.8],[3.2,2.9],[3.3,3.0],[3.4,3.1]],42.5,5000],
+  ["QPSK","LDPC LL","3/4",1.5,[[3.8,3.5],[3.9,3.6],[4.0,3.7],[4.1,3.8]],47.7,5000],
+  ["QPSK","LDPC LL","7/8",1.75,[[4.6,4.3],[4.7,4.4],[4.8,4.5],[4.9,4.6]],55.8,5000],
+  ["8QAM","LDPC LL","2/3",2,[[5.5,5.2],[5.6,5.3],[5.7,5.4],[5.8,5.5]],256,5000],
+  ["8QAM","LDPC LL","3/4",2.25,[[6.3,6.0],[6.4,6.1],[6.5,6.2],[6.6,6.3]],256,5000],
+  ["16QAM","LDPC LL","2/3",2.667,[[6.6,6.3],[6.7,6.4],[6.8,6.5],[6.9,6.6]],256,5000],
+  ["16QAM","LDPC LL","3/4",3,[[7.4,7.1],[7.5,7.2],[7.6,7.3],[7.7,7.4]],256,5000],
+  ["BPSK","LDPC ULL","1/2",.5,[[3.1,2.8],[3.4,3.1],[3.7,3.4],[3.8,3.5]],8,2000],
+  ["QPSK","LDPC ULL","1/2",1,[[3.1,2.8],[3.4,3.1],[3.7,3.4],[3.8,3.5]],32,2000],
+  ["QPSK","LDPC ULL","2/3",1.333,[[3.6,3.3],[3.9,3.6],[4.2,3.9],[4.3,4.0]],41.8,2000],
+  ["QPSK","LDPC ULL","3/4",1.5,[[4.1,3.8],[4.2,3.9],[4.7,4.4],[4.8,4.5]],47,2000]
+]);
+// Generic: indicative Eb/N0 @1e-6 and waterfall steepness (decades per dB)
+const GEN_FEC=[
+  ["Viterbi","1/2",.5,{BPSK:5.5,QPSK:5.5,"8PSK":8.8,"16QAM":9.7},1.3],["Viterbi","3/4",.75,{BPSK:6.8,QPSK:6.8,"8PSK":10.1,"16QAM":11.0},1.3],["Viterbi","7/8",.875,{BPSK:7.7,QPSK:7.7,"8PSK":11.0,"16QAM":11.9},1.3],
+  ["TPC","21/44",21/44,{BPSK:2.7,QPSK:2.7,"8PSK":5.8,"16QAM":6.7},3],["TPC","3/4",.75,{BPSK:3.8,QPSK:3.8,"8PSK":6.2,"16QAM":7.5},3],["TPC","7/8",.875,{BPSK:4.3,QPSK:4.3,"8PSK":7.0,"16QAM":8.6},3],["TPC","0.95",.95,{BPSK:6.4,QPSK:6.4,"8PSK":9.3,"16QAM":10.6},3],
+  ["LDPC","1/2",.5,{BPSK:2.0,QPSK:2.0,"8PSK":4.4,"16QAM":5.5},4],["LDPC","2/3",2/3,{BPSK:2.5,QPSK:2.5,"8PSK":4.5,"16QAM":5.8},4],["LDPC","3/4",.75,{BPSK:3.1,QPSK:3.1,"8PSK":5.3,"16QAM":6.6},4]];
+const GEN=[];
+["BPSK","QPSK","8PSK","16QAM"].forEach(m=>{const b=MODS[m].bits;
+  GEN.push({mods:[m],fec:"None",cr:"1/1",bw:b,min:9.6,max:8000,pts:null});
+  GEN_FEC.forEach(([fec,cr,r,eb,sl])=>GEN.push({mods:[m],fec,cr,bw:b*r,min:9.6,max:8000,pts:[{eb:eb[m],typ:eb[m]-.4,l:-6},{eb:eb[m]+1/sl,typ:eb[m]+1/sl-.4,l:-7}]}));});
+DMD.concat(SLM).forEach(m=>{if(m.fec==="None")m.bw=0;});
+const MODEMS={
+  generic:{short:"Generic",name:"Generic modem",modes:GEN},
+  dmd2050e:{short:"DMD2050E",name:"Comtech EF Data DMD2050E",modes:DMD},
+  slm5650a:{short:"SLM-5650A",name:"Comtech EF Data SLM-5650A",modes:SLM}
+};
+const ROLLOFF=0.2,K_DB=-228.6,TSYS=150,EFF=0.65,GEO_KM=35786;
+
+/* ---------- constellations ---------- */
+function makeConst(m){
+  const pts=[];
+  if(m==="BPSK"){pts.push({i:-1,q:0,b:"0"},{i:1,q:0,b:"1"});}
+  else if(m==="QPSK"||m==="OQPSK"){const s=Math.SQRT1_2;
+    pts.push({i:s,q:s,b:"00"},{i:-s,q:s,b:"01"},{i:-s,q:-s,b:"11"},{i:s,q:-s,b:"10"});}
+  else if(m==="8PSK"){for(let k=0;k<8;k++){const g=k^(k>>1),a=k*Math.PI/4;
+    pts.push({i:Math.cos(a),q:Math.sin(a),b:g.toString(2).padStart(3,"0")});}}
+  else if(m==="8QAM"){ // 4 inner (diagonals) + 4 outer (axes), Gray around the circle
+    const ro=1+Math.sqrt(3),n=Math.sqrt((4*2+4*ro*ro)/8);
+    for(let k=0;k<8;k++){const g=k^(k>>1),a=k*Math.PI/4,r=k%2?Math.SQRT2:ro;
+      pts.push({i:r*Math.cos(a)/n,q:r*Math.sin(a)/n,b:g.toString(2).padStart(3,"0")});}}
+  else if(m==="16APSK"){ // 4+12, ring ratio 2.6
+    const g=2.6,r1=Math.sqrt(16/(4+12*g*g)),r2=g*r1,inner=[8,9,10,11];
+    for(let k=0;k<12;k++){const a=Math.PI/12+k*Math.PI/6,c=k^(k>>1);pts.push({i:r2*Math.cos(a),q:r2*Math.sin(a),b:c.toString(2).padStart(4,"0")});}
+    for(let k=0;k<4;k++){const a=Math.PI/4+k*Math.PI/2;pts.push({i:r1*Math.cos(a),q:r1*Math.sin(a),b:inner[k].toString(2).padStart(4,"0")});}}
+  else{const lv={"00":-3,"01":-1,"11":1,"10":3},n=Math.sqrt(10);
+    for(const bi in lv)for(const bq in lv)pts.push({i:lv[bi]/n,q:lv[bq]/n,b:bi+bq});}
+  return pts;
+}
+function dmin(pts){let d=9;for(let a=0;a<pts.length;a++)for(let b=a+1;b<pts.length;b++)d=Math.min(d,Math.hypot(pts[a].i-pts[b].i,pts[a].q-pts[b].q));return d;}
+
+/* ---------- maths ---------- */
+function erfc(x){const z=Math.abs(x),t=1/(1+.5*z);
+  const r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(.37409196+t*(.09678418+t*(-.18628806+t*(.27886807+t*(-1.13520398+t*(1.48851587+t*(-.82215223+t*.17087277)))))))));
+  return x>=0?r:2-r;}
+const Qf=x=>.5*erfc(x/Math.SQRT2);
+function rawBer(m,esn0){
+  if(m==="BPSK")return Qf(Math.sqrt(2*esn0));
+  if(m==="QPSK"||m==="OQPSK")return Qf(Math.sqrt(esn0));
+  if(m==="8PSK")return (2/3)*Qf(Math.sqrt(2*esn0)*Math.sin(Math.PI/8));
+  if(m==="16QAM")return .75*Qf(Math.sqrt(esn0/5));
+  return Math.min(.5,(2/MODS[m].bits)*Qf(DMIN[m]*Math.sqrt(esn0/2)));
+}
+const DMIN={"8QAM":dmin(makeConst("8QAM")),"16APSK":dmin(makeConst("16APSK"))};
+function uncodedReq(m){let lo=-5,hi=30;for(let i=0;i<50;i++){const mid=(lo+hi)/2;rawBer(m,Math.pow(10,mid/10))>1e-6?lo=mid:hi=mid;}return hi;}
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+// post-FEC BER from datasheet points (guaranteed curve), piecewise log-linear with extrapolation
+function berAt(pts,eb){
+  const A=[];pts.slice().sort((a,b)=>a.eb-b.eb||b.l-a.l).forEach(p=>{if(!A.length||p.eb>A[A.length-1].eb+1e-9)A.push(p);});
+  let l;
+  if(A.length<2)l=A[0].l;
+  else{let i=0;while(i<A.length-2&&eb>A[i+1].eb)i++;
+    const s=(A[i+1].l-A[i].l)/(A[i+1].eb-A[i].eb);l=A[i].l+s*(eb-A[i].eb);}
+  return Math.pow(10,Math.max(-12,Math.min(log10(.5),l)));
+}
+const at6=(pts,k)=>pts.find(p=>p.l===-6)[k];
+
+/* ---------- state ---------- */
+const S={modem:"dmd2050e",f:14,mod:"QPSK",fec:"TPC",cr:"3/4",rate:2048,eirp:35,dish:1.2,wx:0,span:0,speed:1.4,paused:false,t:12,syms:[],hist:[],base:0,lastEmit:12};
+try{const s=JSON.parse(localStorage.getItem("rflab1")||"null");if(s)for(const k of ["modem","f","mod","fec","cr","rate","eirp","dish","wx","span"])if(s[k]!=null)S[k]=s[k];}catch(e){}
+if(!MODEMS[S.modem])S.modem="dmd2050e";
+const save=()=>{try{localStorage.setItem("rflab1",JSON.stringify({modem:S.modem,f:S.f,mod:S.mod,fec:S.fec,cr:S.cr,rate:S.rate,eirp:S.eirp,dish:S.dish,wx:S.wx,span:S.span}))}catch(e){}};
+const bandOf=f=>BANDS.find(b=>f>=b.lo&&f<b.hi)||BANDS[3];
+const RATES=[];for(let k=64;k<=5120;k+=64)RATES.push(k);
+let MODE=null;
+const effOf=m=>m.bw||MODS[S.mod].bits;
+
+function validate(){
+  const modes=MODEMS[S.modem].modes,prevEff=MODE?effOf(MODE)/MODS[S.mod].bits:.75;
+  const mods=MOD_ORDER.filter(m=>modes.some(x=>x.mods.includes(m)));
+  if(!mods.includes(S.mod))S.mod=mods.includes("QPSK")?"QPSK":mods[0];
+  const fecs=FEC_ORDER.filter(f=>modes.some(x=>x.mods.includes(S.mod)&&x.fec===f));
+  if(!fecs.includes(S.fec))S.fec=["TPC","LDPC","Turbo 4486","Viterbi"].find(f=>fecs.includes(f))||fecs[0];
+  const crs=modes.filter(x=>x.mods.includes(S.mod)&&x.fec===S.fec).sort((a,b)=>effOf(a)-effOf(b));
+  if(!crs.some(c=>c.cr===S.cr)){const bits=MODS[S.mod].bits;
+    S.cr=crs.reduce((a,b)=>Math.abs(effOf(b)/bits-prevEff)<Math.abs(effOf(a)/bits-prevEff)?b:a).cr;}
+  MODE=crs.find(c=>c.cr===S.cr);
+  const ok=RATES.filter(k=>k>=MODE.min&&k<=MODE.max);
+  if(!ok.includes(S.rate))S.rate=ok.reduce((a,b)=>Math.abs(b-S.rate)<Math.abs(a-S.rate)?b:a);
+  renderSeg("modSeg",mods.map(m=>({v:m,label:MODS[m].name})),S.mod);
+  renderSeg("fecSeg",fecs.map(f=>({v:f,label:f==="None"?"uncoded":f})),S.fec);
+  renderSeg("crSeg",crs.map(c=>({v:c.cr,label:c.cr})),S.cr);
+  rateIn.innerHTML=RATES.map(k=>'<option value="'+k+'"'+(k<MODE.min||k>MODE.max?" disabled":"")+'>'+k+' kbit/s</option>').join("");
+  rateIn.value=String(S.rate);
+  $("rateHint").textContent="This mode: "+fmtK(MODE.min)+" – "+fmtK(MODE.max)+" kbit/s"+(MODE.max<5120?" (higher rates greyed out)":"");
+}
+
+function link(){
+  const bits=MODS[S.mod].bits,eff=effOf(MODE),R=S.rate*1e3;
+  const Rs=R/eff,bw=Rs*(1+ROLLOFF);
+  const fspl=20*log10(GEO_KM)+20*log10(S.f)+92.45;
+  const gas=0.15+0.02*S.f+1.6*Math.exp(-Math.pow((S.f-22.2)/1.8,2));
+  const rain=S.wx*2.75e-4*Math.pow(S.f,3.26);
+  const lam=0.299792458/S.f;
+  const G=10*log10(EFF*Math.pow(Math.PI*S.dish/lam,2)),GT=G-10*log10(TSYS);
+  const cn0=S.eirp-fspl-gas-rain+GT-K_DB;
+  const es=cn0-10*log10(Rs),eb=cn0-10*log10(R);
+  const raw=rawBer(S.mod,Math.pow(10,es/10));
+  let reqEb,typEb,post;
+  if(MODE.pts){reqEb=at6(MODE.pts,"eb");typEb=at6(MODE.pts,"typ");post=berAt(MODE.pts,eb);}
+  else{reqEb=uncodedReq(S.mod)-10*log10(eff);typEb=null;post=raw;}
+  return {bits,eff,Rs,bw,fspl,gas,rain,GT,cn0,es,eb,reqEb,typEb,margin:eb-reqEb,raw,post,se:eff/(1+ROLLOFF)};
+}
+let L;
+const sigma=()=>Math.sqrt(1/(2*Math.pow(10,Math.min(L.es,40)/10)));
+let PTS=makeConst(S.mod);
+function noisy(p){const s=sigma();return {p,ni:p.i+gauss()*s,nq:p.q+gauss()*s};}
+function symAt(k){const i=Math.max(0,k-S.base);while(S.syms.length<=i)S.syms.push(noisy(PTS[Math.floor(Math.random()*PTS.length)]));return S.syms[i];}
+function resetStream(){S.syms=[];S.base=Math.floor(S.t)-16;S.lastEmit=Math.floor(S.t);refill();}
+function refill(){S.hist=[];for(let i=0;i<220;i++)S.hist.push(noisy(PTS[Math.floor(Math.random()*PTS.length)]));}
+
+/* ---------- UI ---------- */
+const $=id=>document.getElementById(id);
+const bar=$("bandbar"),fIn=$("freq"),rateIn=$("rate"),eirpIn=$("eirp"),modemIn=$("modem");
+BANDS.forEach(b=>{const d=document.createElement("div");d.textContent=b.id;d.style.flex=(b.hi-b.lo);
+  d.style.background=css(b.col);d.dataset.b=b.id;
+  if(b.id==="K"){d.className="k";d.title="K band (between Ku and Ka)";}
+  else{d.tabIndex=0;d.setAttribute("role","button");d.setAttribute("aria-label",b.id+" band, tune to "+b.center+" GHz");
+    const go=()=>{S.f=b.center;fIn.value=S.f;changed();};d.addEventListener("click",go);
+    d.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});}
+  bar.appendChild(d);});
+
+function renderSeg(id,items,cur){$(id).innerHTML=items.map(i=>'<button type="button" data-v="'+i.v+'" aria-pressed="'+(i.v===cur)+'">'+i.label+'</button>').join("");}
+function onSeg(id,fn){$(id).addEventListener("click",e=>{const b=e.target.closest("button");if(b)fn(b.dataset.v);});}
+function staticSeg(id,key){const el=$(id),sync=()=>el.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.v===S[key])));
+  onSeg(id,v=>{S[key]=+v;sync();changed(key);});sync();}
+function setMod(m){const old=S.mod;S.mod=m;validate();PTS=makeConst(S.mod);resetStream();changed();}
+onSeg("modSeg",v=>setMod(v));
+onSeg("fecSeg",v=>{S.fec=v;validate();changed();});
+onSeg("crSeg",v=>{S.cr=v;validate();changed();});
+staticSeg("dishSeg","dish");staticSeg("wxSeg","wx");staticSeg("spanSeg","span");
+modemIn.addEventListener("change",e=>{const old=S.mod;S.modem=e.target.value;validate();if(S.mod!==old){PTS=makeConst(S.mod);resetStream();}changed();});
+fIn.addEventListener("input",e=>{S.f=+e.target.value;changed();});
+rateIn.addEventListener("change",e=>{S.rate=+e.target.value;changed();});
+eirpIn.addEventListener("input",e=>{S.eirp=+e.target.value;changed();});
+$("speed").addEventListener("input",e=>S.speed=+e.target.value);
+$("pause").addEventListener("click",e=>{S.paused=!S.paused;e.target.textContent=S.paused?"Resume":"Pause";});
+if(matchMedia("(prefers-reduced-motion: reduce)").matches){S.speed=.4;$("speed").value=.4;}
+
+function fmtBer(x){if(x<=1e-12)return "< 1e-12";const e=Math.floor(log10(x));return (x/Math.pow(10,e)).toFixed(2)+"e"+e;}
+function fmtHz(h){return h>=1e9?(h/1e9).toFixed(2)+" GHz":h>=1e6?(h/1e6).toFixed(h>=1e8?0:2)+" MHz":(h/1e3).toFixed(0)+" kHz";}
+function fmtRs(r){return r>=1e6?(r/1e6).toFixed(3)+" Msym/s":(r/1e3).toFixed(1)+" ksym/s";}
+function fmtK(k){return k>=1000?Math.round(k).toLocaleString("en-US"):String(k);}
+const db=(v,u="dB")=>(v>=0?"":"−")+Math.abs(v).toFixed(1)+" "+u;
+const fecLabel=()=>S.fec==="None"?"uncoded":S.fec+" "+S.cr;
+
+function changed(key){L=link();if(key!=="span")refill();update();save();}
+function update(){
+  const b=bandOf(S.f),M=MODEMS[S.modem];
+  $("freqOut").innerHTML=S.f.toFixed(2)+"<small>GHz</small>";
+  const tag=$("bandTag");tag.textContent=b.id;tag.style.background=css(b.col);tag.style.color=b.id==="K"?css("--fg"):"#0a1013";
+  [...bar.children].forEach(d=>d.classList.toggle("on",d.dataset.b===b.id));
+  $("lamOut").textContent=(299.792458/S.f).toFixed(1);
+  $("modcodTag").textContent=MODS[S.mod].name+" "+fecLabel();
+  $("budgetModem").textContent=M.short;
+  $("rateOut").textContent=S.rate+" kbit/s";
+  $("eirpOut").textContent=S.eirp.toFixed(1)+" dBW";
+  $("symInfo").textContent=L.bits+(L.bits>1?" bits":" bit")+"/symbol · "+PTS.length+" points"+(S.mod==="OQPSK"?" · Q offset ½ symbol":"");
+  $("rRs").textContent=fmtRs(L.Rs);
+  $("rBw").textContent=fmtHz(L.bw);
+  $("rEff").textContent=L.eff.toFixed(3)+" bit/sym";
+  $("rRange").textContent=fmtK(MODE.min)+" – "+fmtK(MODE.max)+" kbit/s";
+  $("rEirp").textContent=S.eirp.toFixed(1)+" dBW";
+  $("rFspl").textContent=db(-L.fspl);
+  $("rAtm").textContent=db(-(L.gas+L.rain));
+  $("rGt").textContent=L.GT.toFixed(1)+" dB/K";
+  $("rCn0").textContent=L.cn0.toFixed(1)+" dBHz";
+  $("rEs").textContent=db(L.es);
+  $("rEb").textContent=db(L.eb);
+  $("rReqEb").innerHTML=db(L.reqEb)+(L.typEb!=null?" <small>("+L.typEb.toFixed(1)+" typ)</small>":" <small>(theory)</small>");
+  const m=$("rMargin");m.textContent=(L.margin>=0?"+":"−")+Math.abs(L.margin).toFixed(1)+" dB";
+  m.className="margin "+(L.margin>=0?"ok":"bad");
+  $("rBerRaw").textContent=fmtBer(L.raw);
+  $("rBerPost").textContent=fmtBer(L.post);
+  $("bandNote").textContent=b.note;
+}
+
+/* ---------- canvas ---------- */
+function fit(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;
+  const w=Math.round(r.width*d),h=Math.round(r.height*d);
+  if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+  const x=c.getContext("2d");x.setTransform(d,0,0,d,0,0);return {x,w:r.width,h:r.height};}
+const cW=$("cWave"),cC=$("cConst"),cS=$("cSpec");
+
+function drawWave(){
+  const {x,w,h}=fit(cW),N=w>1100?12:8,pad=8,lw=w-pad*2;
+  x.clearRect(0,0,w,h);
+  const t=S.t,k0=Math.floor(t-N),cps=Math.max(2,S.f/2.2),off=S.mod==="OQPSK"?.5:0;
+  const top=h*.36,rfMid=h*.70,rfAmp=h*.24,iqMid=top/2+6,iqAmp=top/2-14;
+  const I=tt=>symAt(Math.floor(tt)).p.i, Qv=tt=>symAt(Math.floor(tt-off)).p.q;
+  x.strokeStyle=css("--grid");x.lineWidth=1;
+  for(let k=k0;k<=k0+N+1;k++){const xp=pad+(k-(t-N))/N*lw;if(xp<pad||xp>w-pad)continue;x.beginPath();x.moveTo(xp,0);x.lineTo(xp,h);x.stroke();}
+  x.beginPath();x.moveTo(pad,top);x.lineTo(w-pad,top);x.strokeStyle=css("--rule");x.stroke();
+  x.strokeStyle=css("--grid");x.beginPath();x.moveTo(pad,rfMid);x.lineTo(w-pad,rfMid);x.moveTo(pad,iqMid);x.lineTo(w-pad,iqMid);x.stroke();
+  x.font="600 12px "+css("--f-mono");x.textAlign="center";
+  for(let k=k0;k<=k0+N;k++){const s=symAt(k),xs=pad+(k+.5-(t-N))/N*lw;if(xs<pad+12||xs>w-pad-12)continue;
+    x.fillStyle=css("--muted");x.fillText(s.p.b,xs,top+15);}
+  const trace=(fn,col,mid,amp,width)=>{x.beginPath();x.strokeStyle=col;x.lineWidth=width;
+    for(let px=0;px<=lw;px++){const tt=t-N+px/lw*N,y=mid-fn(tt)*amp;px?x.lineTo(pad+px,y):x.moveTo(pad+px,y);}x.stroke();};
+  trace(I,css("--i"),iqMid,iqAmp,1.6);
+  if(S.mod!=="BPSK")trace(Qv,css("--q"),iqMid,iqAmp,1.6);
+  const rf=tt=>{const ph=2*Math.PI*cps*tt;return I(tt)*Math.cos(ph)-Qv(tt)*Math.sin(ph);};
+  x.save();x.shadowColor=css("--trace");x.shadowBlur=8;x.beginPath();x.strokeStyle=css("--trace");x.lineWidth=1.5;
+  const steps=Math.min(lw*3,3600);
+  for(let i=0;i<=steps;i++){const px=i/steps*lw,tt=t-N+px/lw*N,y=rfMid-rf(tt)*rfAmp/1.42;i?x.lineTo(pad+px,y):x.moveTo(pad+px,y);}
+  x.stroke();x.restore();
+  x.setLineDash([3,4]);
+  trace(tt=>Math.hypot(I(tt),Qv(tt))/1.42,css("--trace-dim"),rfMid,rfAmp,1);
+  trace(tt=>-Math.hypot(I(tt),Qv(tt))/1.42,css("--trace-dim"),rfMid,rfAmp,1);
+  x.setLineDash([]);
+  x.fillStyle=css("--muted");x.textAlign="left";x.font="11px "+css("--f-mono");
+  x.fillText("I/Q baseband",pad+4,12);x.fillText("RF · "+cps.toFixed(1)+" cycles/symbol (scaled)",pad+4,top+32);
+}
+
+function drawConst(){
+  const {x,w,h}=fit(cC),cx=w/2,cy=h/2,R=Math.min(w,h)*.34;
+  x.clearRect(0,0,w,h);
+  x.strokeStyle=css("--grid");x.lineWidth=1;
+  for(let g=-1.5;g<=1.5;g+=.5){x.beginPath();x.moveTo(cx+g*R,8);x.lineTo(cx+g*R,h-8);x.moveTo(cx-1.6*R,cy+g*R);x.lineTo(cx+1.6*R,cy+g*R);x.stroke();}
+  x.strokeStyle=css("--rule");x.beginPath();x.moveTo(cx-1.6*R,cy);x.lineTo(cx+1.6*R,cy);x.moveTo(cx,8);x.lineTo(cx,h-8);x.stroke();
+  const rings=[...new Set(PTS.map(p=>Math.hypot(p.i,p.q).toFixed(3)))];
+  if(S.mod.includes("PSK")){x.setLineDash([2,4]);rings.forEach(r=>{x.beginPath();x.arc(cx,cy,+r*R,0,Math.PI*2);x.stroke();});x.setLineDash([]);}
+  x.fillStyle=css("--muted");x.font="11px "+css("--f-mono");x.textAlign="right";x.fillText("I",cx+1.6*R,cy-6);x.textAlign="left";x.fillText("Q",cx+6,18);
+  const n=S.hist.length;
+  x.save();x.beginPath();x.rect(2,2,w-4,h-4);x.clip();
+  S.hist.forEach((p,j)=>{x.fillStyle="rgba(255,181,71,"+(.15+.6*(j/n)).toFixed(3)+")";
+    x.beginPath();x.arc(cx+p.ni*R,cy-p.nq*R,2,0,Math.PI*2);x.fill();});
+  x.restore();
+  const cur=symAt(Math.floor(S.t)).p;
+  x.font="600 11px "+css("--f-mono");x.textAlign="center";
+  PTS.forEach(p=>{const px=cx+p.i*R,py=cy-p.q*R,on=p===cur;
+    x.strokeStyle=on?css("--fg"):css("--i");x.lineWidth=on?2:1.3;
+    x.beginPath();x.arc(px,py,on?7:5,0,Math.PI*2);x.stroke();
+    x.fillStyle=css("--fg");x.globalAlpha=on?1:.7;x.fillText(p.b,px,py-12);x.globalAlpha=1;});
+  if(n>20){let e=0;S.hist.forEach(p=>{e+=(p.ni-p.p.i)**2+(p.nq-p.p.q)**2;});
+    $("evmOut").textContent="EVM "+(Math.sqrt(e/n)*100).toFixed(1)+" %";}
+}
+
+function rc(f,Rs){const a=Math.abs(f),f1=(1-ROLLOFF)*Rs/2,f2=(1+ROLLOFF)*Rs/2;
+  if(a<=f1)return 1;if(a>=f2)return 0;return .5*(1+Math.cos(Math.PI/(ROLLOFF*Rs)*(a-f1)));}
+function autoSpan(bw){const t=bw*2.5,seq=[];for(let e=4;e<9;e++)for(const m of [1,2,5])seq.push(m*Math.pow(10,e));return seq.find(v=>v>=t)||1e9;}
+let specAvg=null;
+function drawSpec(){
+  const {x,w,h}=fit(cS),Lp=38,Rp=12,T=14,B=30,pw=w-Lp-Rp,ph=h-T-B;
+  const span=S.span?S.span*1e6:autoSpan(L.bw),dbMin=-5,dbMax=Math.max(30,Math.ceil((L.es+6)/10)*10);
+  const X=df=>Lp+(df/span+.5)*pw,Y=d=>T+(dbMax-d)/(dbMax-dbMin)*ph;
+  x.clearRect(0,0,w,h);
+  x.strokeStyle=css("--grid");x.lineWidth=1;x.fillStyle=css("--muted");x.font="11px "+css("--f-mono");
+  for(let d=0;d<=dbMax;d+=10){x.beginPath();x.moveTo(Lp,Y(d));x.lineTo(w-Rp,Y(d));x.stroke();x.textAlign="right";x.fillText(d,Lp-5,Y(d)+3);}
+  for(let i=0;i<=4;i++){const df=(i/4-.5)*span,xp=X(df);x.beginPath();x.moveTo(xp,T);x.lineTo(xp,T+ph);x.stroke();
+    x.textAlign=i===0?"left":i===4?"right":"center";x.fillText(i===2?S.f.toFixed(3)+" GHz":(df>0?"+":"−")+fmtHz(Math.abs(df)),xp,h-B+16);}
+  x.textAlign="left";x.fillText("dB",4,T+4);
+  const n=Math.max(2,Math.floor(pw)),esLin=Math.pow(10,Math.min(L.es,60)/10);
+  if(!specAvg||specAvg.length!==n+1)specAvg=new Float32Array(n+1);
+  x.beginPath();
+  for(let i=0;i<=n;i++){const df=(i/n-.5)*span;
+    const lin=esLin*rc(df,L.Rs)+Math.max(.05,1+.35*gauss());
+    specAvg[i]=specAvg[i]?specAvg[i]*.7+lin*.3:lin;
+    const d=Math.max(dbMin,Math.min(dbMax,10*log10(specAvg[i])));
+    i?x.lineTo(Lp+i/n*pw,Y(d)):x.moveTo(Lp,Y(d));}
+  x.save();x.strokeStyle=css("--trace");x.lineWidth=1.3;x.shadowColor=css("--trace");x.shadowBlur=6;x.stroke();x.restore();
+  x.lineTo(Lp+pw,Y(dbMin));x.lineTo(Lp,Y(dbMin));x.closePath();x.fillStyle=css("--trace-dim");x.fill();
+  const half=L.bw/2,xl=X(-half),xr=X(half),yb=Y(Math.min(dbMax-2,10*log10(esLin+1)))-10;
+  const vis=Math.max(Lp,xl),vis2=Math.min(Lp+pw,xr);
+  x.strokeStyle=css("--fg");x.globalAlpha=.75;x.lineWidth=1;
+  x.beginPath();x.moveTo(vis,yb);x.lineTo(vis2,yb);
+  if(xl>=Lp){x.moveTo(xl,yb-4);x.lineTo(xl,yb+4);}if(xr<=Lp+pw){x.moveTo(xr,yb-4);x.lineTo(xr,yb+4);}x.stroke();x.globalAlpha=1;
+  const lbl="B = "+fmtHz(L.bw)+(L.bw>span?"  (wider than span)":"");
+  x.font="600 12px "+css("--f-mono");x.textAlign="center";x.fillStyle=css("--fg");
+  x.fillText(lbl,Math.min(Math.max((vis+vis2)/2,Lp+100),Lp+pw-100),Math.max(T+10,yb-6));
+}
+
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(.1,(now-last)/1000);last=now;
+  if(!S.paused){
+    S.t+=dt*S.speed;const k=Math.floor(S.t);
+    while(S.lastEmit<k){S.lastEmit++;S.hist.push(symAt(S.lastEmit));if(S.hist.length>500)S.hist.shift();}
+    if(S.syms.length>200){const drop=S.syms.length-60;S.syms.splice(0,drop);S.base+=drop;}
+  }
+  drawWave();drawConst();drawSpec();
+  requestAnimationFrame(frame);
+}
+modemIn.value=S.modem;fIn.value=S.f;eirpIn.value=S.eirp;
+validate();PTS=makeConst(S.mod);L=link();resetStream();update();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

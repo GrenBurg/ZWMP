@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Zendweg Multiplayer</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -27,7 +28,20 @@ h1 span{color:var(--trace)}
 .bf-mark{height:42px;width:auto;flex:none;display:block}
 .bf-name{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.03em;line-height:1;color:var(--fg)}
 .bf-name b{color:var(--trace);font-weight:700}
-h1 .ver{font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:3px;padding:2px 6px;vertical-align:middle;letter-spacing:0}
+h1 .ver,.appsw .ver{font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:3px;padding:2px 6px;vertical-align:middle;letter-spacing:0}
+.appsw{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 22px}
+.appsw button{background:none;border:0;padding:0;cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);line-height:1}
+.appsw button span{color:inherit}
+.appsw button:hover{color:var(--fg)}
+.appsw button[aria-current=page]{font-size:clamp(28px,3vw,38px);letter-spacing:.02em;text-transform:none;color:var(--fg);cursor:default;order:-1}
+.appsw button[aria-current=page] span{color:var(--trace)}
+.appsw .ver{order:-1;align-self:center}
+body.rf .app>:not(header):not(#rfWrap){display:none!important}
+#rfWrap{display:none;position:fixed;left:0;right:0;bottom:0;top:var(--hdr,90px)}
+body.rf{padding-bottom:0;overflow:hidden}
+body.rf .app{max-width:none}
+body.rf #rfWrap{display:block}
+#rfFrame{display:block;width:100%;height:100%;border:0;background:var(--bg)}
 .sub{color:var(--muted);margin:0;max-width:72ch;line-height:1.45}
 .panel{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;min-width:0}
 .lbl{font-family:var(--f-display);font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
@@ -184,13 +198,14 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
 
 <div class="app">
   <header>
-    <div class="brandrow"><div class="bf" title="BurgFunk"><svg class="bf-mark" viewBox="0 0 120 200" aria-hidden="true" focusable="false"><defs><linearGradient id="bfA" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#ffd58c"/><stop offset=".55" stop-color="#ffb547"/><stop offset="1" stop-color="#e48f25"/></linearGradient><filter id="bfG" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><ellipse cx="60" cy="100" rx="46" ry="78" fill="#0d1518"/><g stroke="#5fd0e6" stroke-width="1.6" opacity=".8"><line x1="111.0" y1="100.0" x2="117.0" y2="100.0"/><line x1="104.2" y1="141.5" x2="109.4" y2="144.5"/><line x1="85.5" y1="171.9" x2="88.5" y2="177.1"/><line x1="60.0" y1="183.0" x2="60.0" y2="189.0"/><line x1="34.5" y1="171.9" x2="31.5" y2="177.1"/><line x1="15.8" y1="141.5" x2="10.6" y2="144.5"/><line x1="9.0" y1="100.0" x2="3.0" y2="100.0"/><line x1="15.8" y1="58.5" x2="10.6" y2="55.5"/><line x1="34.5" y1="28.1" x2="31.5" y2="22.9"/><line x1="60.0" y1="17.0" x2="60.0" y2="11.0"/><line x1="85.5" y1="28.1" x2="88.5" y2="22.9"/><line x1="104.2" y1="58.5" x2="109.4" y2="55.5"/></g><ellipse cx="60" cy="100" rx="46" ry="78" fill="none" stroke="#5fd0e6" stroke-width="3" filter="url(#bfG)"/><ellipse cx="60" cy="100" rx="41" ry="73" fill="none" stroke="#5fd0e6" stroke-width="1" opacity=".4"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="url(#bfA)" filter="url(#bfG)"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="none" stroke="#ffe2ad" stroke-width="1" stroke-linejoin="round"/></svg><span class="bf-name">Burg<b>Funk</b></span></div><h1>Zendweg <span>Multiplayer</span> <small class="ver mono">v1.3</small></h1></div>
+    <div class="brandrow"><div class="bf" title="BurgFunk"><svg class="bf-mark" viewBox="0 0 120 200" aria-hidden="true" focusable="false"><defs><linearGradient id="bfA" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#ffd58c"/><stop offset=".55" stop-color="#ffb547"/><stop offset="1" stop-color="#e48f25"/></linearGradient><filter id="bfG" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><ellipse cx="60" cy="100" rx="46" ry="78" fill="#0d1518"/><g stroke="#5fd0e6" stroke-width="1.6" opacity=".8"><line x1="111.0" y1="100.0" x2="117.0" y2="100.0"/><line x1="104.2" y1="141.5" x2="109.4" y2="144.5"/><line x1="85.5" y1="171.9" x2="88.5" y2="177.1"/><line x1="60.0" y1="183.0" x2="60.0" y2="189.0"/><line x1="34.5" y1="171.9" x2="31.5" y2="177.1"/><line x1="15.8" y1="141.5" x2="10.6" y2="144.5"/><line x1="9.0" y1="100.0" x2="3.0" y2="100.0"/><line x1="15.8" y1="58.5" x2="10.6" y2="55.5"/><line x1="34.5" y1="28.1" x2="31.5" y2="22.9"/><line x1="60.0" y1="17.0" x2="60.0" y2="11.0"/><line x1="85.5" y1="28.1" x2="88.5" y2="22.9"/><line x1="104.2" y1="58.5" x2="109.4" y2="55.5"/></g><ellipse cx="60" cy="100" rx="46" ry="78" fill="none" stroke="#5fd0e6" stroke-width="3" filter="url(#bfG)"/><ellipse cx="60" cy="100" rx="41" ry="73" fill="none" stroke="#5fd0e6" stroke-width="1" opacity=".4"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="url(#bfA)" filter="url(#bfG)"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="none" stroke="#ffe2ad" stroke-width="1" stroke-linejoin="round"/></svg><span class="bf-name">Burg<b>Funk</b></span></div><nav class="appsw" aria-label="Kies onderdeel"><button type="button" data-app="zw" aria-current="page">Zendweg <span>Multiplayer</span></button><button type="button" data-app="rf">RF <span>Lab</span></button><small class="ver mono">v1.4</small></nav></div>
     <div class="mpbar">
       <span class="rolechip mono" id="mpRole">ROL · —</span>
       <span class="pill" id="mpConn">NIET GEKOPPELD</span>
       <button class="btn" id="mpOpen" type="button">Koppelen</button>
     </div>
   </header>
+  <div id="rfWrap"><iframe id="rfFrame" title="RF Lab"></iframe></div>
 
   <section class="panel p-zw" aria-label="Zendweg">
     <div class="lbl"><span>Zendweg · SES-4 Ku</span>
@@ -1118,12 +1133,33 @@ const _update=update;
 /* sluit een tabblad netjes af: de ander krijgt 'bye' */
 update=function(){_update();renderWx();if(!applying)sendState(false);};
 renderMp();
-setTimeout(()=>{if(!$('mp').open){show('stRole');$('mp').showModal();}},0);
+setTimeout(()=>{if(!$('mp').open&&location.hash!=='#rflab'){show('stRole');$('mp').showModal();}},0);
 
 fill('as');fill('cct');update();
 let lastSpec=0;
 function frame(now){if(!paused)tFrozen=now;draw(tFrozen);if(now-lastSpec>120&&!paused){lastSpec=now;drawSA();}requestAnimationFrame(frame);}
 document.fonts&&document.fonts.load('16px "Share Tech Mono"').catch(()=>{});
 requestAnimationFrame(frame);
+})();
+</script>
+<script>
+/* Onderdeelkeuze: Zendweg Multiplayer of RF Lab. RF Lab draait in een iframe, zodat de zendweg (en een lopende koppeling) blijft doorlopen. */
+(function(){
+  const sw=document.querySelector(".appsw"),frame=document.getElementById("rfFrame"),hdr=document.querySelector(".app>header");
+  const TITLES={zw:"Zendweg Multiplayer",rf:"RF Lab"};
+  function setHdr(){const r=hdr.getBoundingClientRect();document.documentElement.style.setProperty("--hdr",Math.ceil(r.bottom+10)+"px");}
+  function show(app,push){
+    if(!TITLES[app])app="zw";
+    sw.querySelectorAll("button").forEach(b=>{if(b.dataset.app===app)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
+    document.body.classList.toggle("rf",app==="rf");
+    if(app==="rf"&&!frame.getAttribute("src"))frame.setAttribute("src","rflab.html");
+    document.title=TITLES[app];
+    if(push){try{history.replaceState(null,"",app==="rf"?"#rflab":location.pathname+location.search);}catch(e){}}
+    requestAnimationFrame(()=>{setHdr();window.dispatchEvent(new Event("resize"));});
+  }
+  sw.addEventListener("click",e=>{const b=e.target.closest("button[data-app]");if(b)show(b.dataset.app,true);});
+  window.addEventListener("resize",setHdr);
+  window.addEventListener("hashchange",()=>show(location.hash==="#rflab"?"rf":"zw",false));
+  show(location.hash==="#rflab"?"rf":"zw",false);
 })();
 </script>
