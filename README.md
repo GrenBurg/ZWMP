@@ -31,3 +31,4 @@ Bovenin kies je tussen **Zendweg Multiplayer** en **RF Lab**; het gekozen onderd
 | v1.2 | BurgFunk-logo in de kop en als favicon |
 | v1.3 | Weer per locatie (6 situaties) en ruimtestorm; willekeurig verloop of handmatig te kiezen |
 | v1.4 | RF Lab (voorheen SHF Modulation Lab) toegevoegd; bovenin kiezen tussen Zendweg en RF Lab |
+| v1.5 | Niet-gekozen onderdeel bovenin kleiner maar in kleur |
