@@ -24,3 +24,4 @@ Solo spelen kan ook: dan staan beide modems op één scherm.
 |---|---|
 | v1.0 | Eerste multiplayerversie, gebouwd op SES-4 Zendweg Lab v1.8 |
 | v1.1 | Koppelen via sessienaam over de Ably-relay (HTTPS); handmatige codes blijven als reserve |
+| v1.2 | BurgFunk-logo in de kop en als favicon |

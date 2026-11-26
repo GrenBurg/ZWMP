@@ -1,4 +1,5 @@
 <title>Zendweg Multiplayer</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Share+Tech+Mono&display=swap">
@@ -21,6 +22,11 @@ body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14
 header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 24px}
 h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,3vw,38px);letter-spacing:.02em;margin:0;line-height:1;text-wrap:balance}
 h1 span{color:var(--trace)}
+.brandrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.bf{display:flex;align-items:center;gap:8px;padding-right:14px;border-right:1px solid var(--rule)}
+.bf-mark{height:42px;width:auto;flex:none;display:block}
+.bf-name{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.03em;line-height:1;color:var(--fg)}
+.bf-name b{color:var(--trace);font-weight:700}
 h1 .ver{font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:3px;padding:2px 6px;vertical-align:middle;letter-spacing:0}
 .sub{color:var(--muted);margin:0;max-width:72ch;line-height:1.45}
 .panel{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;min-width:0}
@@ -170,7 +176,7 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
 
 <div class="app">
   <header>
-    <h1>Zendweg <span>Multiplayer</span> <small class="ver mono">v1.1</small></h1>
+    <div class="brandrow"><div class="bf" title="BurgFunk"><svg class="bf-mark" viewBox="0 0 120 200" aria-hidden="true" focusable="false"><defs><linearGradient id="bfA" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#ffd58c"/><stop offset=".55" stop-color="#ffb547"/><stop offset="1" stop-color="#e48f25"/></linearGradient><filter id="bfG" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><ellipse cx="60" cy="100" rx="46" ry="78" fill="#0d1518"/><g stroke="#5fd0e6" stroke-width="1.6" opacity=".8"><line x1="111.0" y1="100.0" x2="117.0" y2="100.0"/><line x1="104.2" y1="141.5" x2="109.4" y2="144.5"/><line x1="85.5" y1="171.9" x2="88.5" y2="177.1"/><line x1="60.0" y1="183.0" x2="60.0" y2="189.0"/><line x1="34.5" y1="171.9" x2="31.5" y2="177.1"/><line x1="15.8" y1="141.5" x2="10.6" y2="144.5"/><line x1="9.0" y1="100.0" x2="3.0" y2="100.0"/><line x1="15.8" y1="58.5" x2="10.6" y2="55.5"/><line x1="34.5" y1="28.1" x2="31.5" y2="22.9"/><line x1="60.0" y1="17.0" x2="60.0" y2="11.0"/><line x1="85.5" y1="28.1" x2="88.5" y2="22.9"/><line x1="104.2" y1="58.5" x2="109.4" y2="55.5"/></g><ellipse cx="60" cy="100" rx="46" ry="78" fill="none" stroke="#5fd0e6" stroke-width="3" filter="url(#bfG)"/><ellipse cx="60" cy="100" rx="41" ry="73" fill="none" stroke="#5fd0e6" stroke-width="1" opacity=".4"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="url(#bfA)" filter="url(#bfG)"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="none" stroke="#ffe2ad" stroke-width="1" stroke-linejoin="round"/></svg><span class="bf-name">Burg<b>Funk</b></span></div><h1>Zendweg <span>Multiplayer</span> <small class="ver mono">v1.2</small></h1></div>
     <div class="mpbar">
       <span class="rolechip mono" id="mpRole">ROL · —</span>
       <span class="pill" id="mpConn">NIET GEKOPPELD</span>
@@ -796,7 +802,7 @@ function saInfo(){const L=LNB[S.as.rx.lnb],cf=R.car.cct.dl,c=R.car.cct;
     (c.tx?'':' De CCT200 zendt nu niet uit.');}
 
 /* ================= MULTIPLAYER (handmatig koppelen, WebRTC) ================= */
-const MP_VER='1.1';
+const MP_VER='1.2';
 const ABLY_KEY='Rk0XpA.odnQFw:c5cSSJfvdcerMJHc4yLP5JptRDgTPOr6me6MLVc1Nms'; /* alleen publish/subscribe/presence op zwmp:* */
 const FECALL=Object.entries(FECS).flatMap(([g,rs])=>rs.map(r=>g+' '+r));
 const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'}]};
