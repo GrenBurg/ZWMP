@@ -1,6 +1,6 @@
 # Zendweg Multiplayer
 
-Trainingssim voor beginnende satcom-operators, voor twee spelers. De ene speler bedient het grondstation (DMD2050E in L-band, met spectrum analyzer), de andere de CCT200 in het veld (Ku). Samen bouwen ze een link op via SES-4 (transponder EUV05 of EUV09).
+Trainingssim voor beginnende satcom-operators, voor twee operators. De ene operator bedient het grondstation (DMD2050E in L-band, met spectrum analyzer), de andere de CCT200 in het veld (Ku). Samen bouwen ze een link op via SES-4 (transponder EUV05 of EUV09).
 
 **Openen:** https://grenburg.github.io/ZWMP/
 
@@ -14,7 +14,7 @@ De koppeling loopt via de Ably-relay over gewoon HTTPS. Daardoor werkt hij ook i
 
 **Handmatig koppelen met codes** blijft beschikbaar als reserve. Dat is een directe WebRTC-verbinding zonder relay, en werkt alleen waar WebRTC aanstaat.
 
-Solo spelen kan ook: dan staan beide modems op één scherm.
+Solo oefenen kan ook: dan staan beide modems op één scherm.
 
 ## RF Lab
 
@@ -32,3 +32,4 @@ Bovenin kies je tussen **Zendweg Multiplayer** en **RF Lab**; het gekozen onderd
 | v1.3 | Weer per locatie (6 situaties) en ruimtestorm; willekeurig verloop of handmatig te kiezen |
 | v1.4 | RF Lab (voorheen SHF Modulation Lab) toegevoegd; bovenin kiezen tussen Zendweg en RF Lab |
 | v1.5 | Niet-gekozen onderdeel bovenin kleiner maar in kleur |
+| v1.4 | Overal "operator" in plaats van "speler" |

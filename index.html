@@ -1,4 +1,3 @@
-<meta charset="utf-8">
 <title>Zendweg Multiplayer</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -28,20 +27,7 @@ h1 span{color:var(--trace)}
 .bf-mark{height:42px;width:auto;flex:none;display:block}
 .bf-name{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.03em;line-height:1;color:var(--fg)}
 .bf-name b{color:var(--trace);font-weight:700}
-h1 .ver,.appsw .ver{font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:3px;padding:2px 6px;vertical-align:middle;letter-spacing:0}
-.appsw{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 22px}
-.appsw button{background:none;border:0;padding:0;cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:21px;letter-spacing:.02em;color:var(--fg);line-height:1;opacity:.9}
-.appsw button span{color:var(--trace)}
-.appsw button:hover{opacity:1;text-decoration:underline;text-decoration-color:var(--trace);text-underline-offset:4px}
-.appsw button[aria-current=page]{font-size:clamp(28px,3vw,38px);opacity:1;cursor:default;order:-1;text-decoration:none}
-.appsw button[aria-current=page] span{color:var(--trace)}
-.appsw .ver{order:-1;align-self:center}
-body.rf .app>:not(header):not(#rfWrap){display:none!important}
-#rfWrap{display:none;position:fixed;left:0;right:0;bottom:0;top:var(--hdr,90px)}
-body.rf{padding-bottom:0;overflow:hidden}
-body.rf .app{max-width:none}
-body.rf #rfWrap{display:block}
-#rfFrame{display:block;width:100%;height:100%;border:0;background:var(--bg)}
+h1 .ver{font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:3px;padding:2px 6px;vertical-align:middle;letter-spacing:0}
 .sub{color:var(--muted);margin:0;max-width:72ch;line-height:1.45}
 .panel{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:12px 14px;min-width:0}
 .lbl{font-family:var(--f-display);font-weight:500;text-transform:uppercase;letter-spacing:.12em;font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
@@ -198,14 +184,13 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
 
 <div class="app">
   <header>
-    <div class="brandrow"><div class="bf" title="BurgFunk"><svg class="bf-mark" viewBox="0 0 120 200" aria-hidden="true" focusable="false"><defs><linearGradient id="bfA" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#ffd58c"/><stop offset=".55" stop-color="#ffb547"/><stop offset="1" stop-color="#e48f25"/></linearGradient><filter id="bfG" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><ellipse cx="60" cy="100" rx="46" ry="78" fill="#0d1518"/><g stroke="#5fd0e6" stroke-width="1.6" opacity=".8"><line x1="111.0" y1="100.0" x2="117.0" y2="100.0"/><line x1="104.2" y1="141.5" x2="109.4" y2="144.5"/><line x1="85.5" y1="171.9" x2="88.5" y2="177.1"/><line x1="60.0" y1="183.0" x2="60.0" y2="189.0"/><line x1="34.5" y1="171.9" x2="31.5" y2="177.1"/><line x1="15.8" y1="141.5" x2="10.6" y2="144.5"/><line x1="9.0" y1="100.0" x2="3.0" y2="100.0"/><line x1="15.8" y1="58.5" x2="10.6" y2="55.5"/><line x1="34.5" y1="28.1" x2="31.5" y2="22.9"/><line x1="60.0" y1="17.0" x2="60.0" y2="11.0"/><line x1="85.5" y1="28.1" x2="88.5" y2="22.9"/><line x1="104.2" y1="58.5" x2="109.4" y2="55.5"/></g><ellipse cx="60" cy="100" rx="46" ry="78" fill="none" stroke="#5fd0e6" stroke-width="3" filter="url(#bfG)"/><ellipse cx="60" cy="100" rx="41" ry="73" fill="none" stroke="#5fd0e6" stroke-width="1" opacity=".4"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="url(#bfA)" filter="url(#bfG)"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="none" stroke="#ffe2ad" stroke-width="1" stroke-linejoin="round"/></svg><span class="bf-name">Burg<b>Funk</b></span></div><nav class="appsw" aria-label="Kies onderdeel"><button type="button" data-app="zw" aria-current="page">Zendweg <span>Multiplayer</span></button><button type="button" data-app="rf">RF <span>Lab</span></button><small class="ver mono">v1.5</small></nav></div>
+    <div class="brandrow"><div class="bf" title="BurgFunk"><svg class="bf-mark" viewBox="0 0 120 200" aria-hidden="true" focusable="false"><defs><linearGradient id="bfA" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#ffd58c"/><stop offset=".55" stop-color="#ffb547"/><stop offset="1" stop-color="#e48f25"/></linearGradient><filter id="bfG" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><ellipse cx="60" cy="100" rx="46" ry="78" fill="#0d1518"/><g stroke="#5fd0e6" stroke-width="1.6" opacity=".8"><line x1="111.0" y1="100.0" x2="117.0" y2="100.0"/><line x1="104.2" y1="141.5" x2="109.4" y2="144.5"/><line x1="85.5" y1="171.9" x2="88.5" y2="177.1"/><line x1="60.0" y1="183.0" x2="60.0" y2="189.0"/><line x1="34.5" y1="171.9" x2="31.5" y2="177.1"/><line x1="15.8" y1="141.5" x2="10.6" y2="144.5"/><line x1="9.0" y1="100.0" x2="3.0" y2="100.0"/><line x1="15.8" y1="58.5" x2="10.6" y2="55.5"/><line x1="34.5" y1="28.1" x2="31.5" y2="22.9"/><line x1="60.0" y1="17.0" x2="60.0" y2="11.0"/><line x1="85.5" y1="28.1" x2="88.5" y2="22.9"/><line x1="104.2" y1="58.5" x2="109.4" y2="55.5"/></g><ellipse cx="60" cy="100" rx="46" ry="78" fill="none" stroke="#5fd0e6" stroke-width="3" filter="url(#bfG)"/><ellipse cx="60" cy="100" rx="41" ry="73" fill="none" stroke="#5fd0e6" stroke-width="1" opacity=".4"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="url(#bfA)" filter="url(#bfG)"/><path d="M54.0,49.6 L62.1,49.6 L55.8,89.6 L68.3,88.3 L64.2,127.0 L75.9,126.5 L63.4,147.3 L49.9,126.0 L58.7,127.0 L61.8,102.1 L47.3,107.8 Z" fill="none" stroke="#ffe2ad" stroke-width="1" stroke-linejoin="round"/></svg><span class="bf-name">Burg<b>Funk</b></span></div><h1>Zendweg <span>Multiplayer</span> <small class="ver mono">v1.4</small></h1></div>
     <div class="mpbar">
       <span class="rolechip mono" id="mpRole">ROL · —</span>
       <span class="pill" id="mpConn">NIET GEKOPPELD</span>
       <button class="btn" id="mpOpen" type="button">Koppelen</button>
     </div>
   </header>
-  <div id="rfWrap"><iframe id="rfFrame" title="RF Lab"></iframe></div>
 
   <section class="panel p-zw" aria-label="Zendweg">
     <div class="lbl"><span>Zendweg · SES-4 Ku</span>
@@ -236,14 +221,14 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
   </section>
   <div class="units" id="units"></div>
 
-  <details class="foot"><summary>Toelichting bij het model</summary><p>Frequentieplan: de uplink van het grondstation is de Tx L-band plus de BUC-LO van 12.800 MHz (BUC-band 13.750–14.500 MHz). De satelliet verlaagt met de translatie van de gekozen transponder. De LNB in het grondstation zet de downlink om met LO 10.000 MHz (Ku laag, 10.700–11.700 MHz) of 10.750 MHz (Ku hoog, 11.700–12.750 MHz) en heeft een vaste drift van +2,7 kHz; de CCT200 rekent zelf om en heeft −1,4 kHz drift. De demod lockt als de carrier binnen het vaste zoekbereik van ±30 kHz valt en modulatie, FEC en data rate gelijk zijn. Beide ontvangers zien ook hun eigen carrier terug (loopback). De spectrum analyzer staat in het grondstation achter de LNB en toont de Ku-frequentie; de center volgt de downlink van de CCT200 en de gele markering is de afstemming van de demod, teruggerekend naar Ku. Modcods, data-ratebereiken en Eb/No-drempels komen uit het DMD2050E-datasheet (gegarandeerde Eb/No bij BER 10⁻⁷); 8PSK LDPC staat daar niet in de prestatietabel en is geschat. Onder de drempel lockt de demod met bitfouten, ruim 1 dB eronder niet meer. De Eb/No zelf is een indicatief model met een vaste linkwinst per richting en overdrive boven −10 dBm modemuitgang. Symbol rate = data rate / bandbreedte-efficiëntie, bezette bandbreedte met roll-off 0,35. Het grondstation kan in CW (ongemoduleerd) zenden: een zuivere draaggolf zonder data, die op de spectrum analyzer als smalle lijn verschijnt. Data rate, modulatie en FEC doen dan niet mee en geen demod lockt. De CCT200 start altijd in CW: CW → Confirm zet een draaggolf aan, Modulate → Confirm schakelt over op data, Abort stopt het zenden. Reset zet de sim-standaardwaarden (Tx mode normaal, carrier uit, −25 dBm). Multiplayer: elke speler stuurt alleen de instellingen van zijn eigen modem, en beide schermen rekenen daarmee dezelfde link door. Het grondstation kiest de transponder. Valt de verbinding weg, dan stopt de carrier van de andere kant. De koppeling loopt via de Ably-relay over gewoon HTTPS, zodat hij ook werkt in getunnelde werkomgevingen; de berichten zijn versleuteld met een sleutel die uit sessienaam en wachtwoord wordt afgeleid. Handmatig koppelen met codes maakt een directe WebRTC-verbinding en werkt alleen waar WebRTC aanstaat. Weer: elke locatie heeft een eigen weer (helder, bewolkt, motregen, regen, zware regen of onweersbui). Regen dempt de uplink vanaf die locatie (Ku 14 GHz) volledig en de downlink naar die locatie voor 75 %, plus de extra ruis die de natte atmosfeer in de ontvanger brengt; bij zware regen en onweer schommelt de demping. Zonder handmatige keuze verandert het weer per locatie willekeurig om de twee à vijf minuten, en af en toe trekt er een ruimtestorm over die beide richtingen met scintillatie en korte drop-outs treft. Die stormeffecten zijn voor de oefening aangezet: op Ku-band naar een geostationaire satelliet zijn ze in werkelijkheid meestal klein. Het grondstation bepaalt het weer en geeft het door aan de CCT200.</p></details>
+  <details class="foot"><summary>Toelichting bij het model</summary><p>Frequentieplan: de uplink van het grondstation is de Tx L-band plus de BUC-LO van 12.800 MHz (BUC-band 13.750–14.500 MHz). De satelliet verlaagt met de translatie van de gekozen transponder. De LNB in het grondstation zet de downlink om met LO 10.000 MHz (Ku laag, 10.700–11.700 MHz) of 10.750 MHz (Ku hoog, 11.700–12.750 MHz) en heeft een vaste drift van +2,7 kHz; de CCT200 rekent zelf om en heeft −1,4 kHz drift. De demod lockt als de carrier binnen het vaste zoekbereik van ±30 kHz valt en modulatie, FEC en data rate gelijk zijn. Beide ontvangers zien ook hun eigen carrier terug (loopback). De spectrum analyzer staat in het grondstation achter de LNB en toont de Ku-frequentie; de center volgt de downlink van de CCT200 en de gele markering is de afstemming van de demod, teruggerekend naar Ku. Modcods, data-ratebereiken en Eb/No-drempels komen uit het DMD2050E-datasheet (gegarandeerde Eb/No bij BER 10⁻⁷); 8PSK LDPC staat daar niet in de prestatietabel en is geschat. Onder de drempel lockt de demod met bitfouten, ruim 1 dB eronder niet meer. De Eb/No zelf is een indicatief model met een vaste linkwinst per richting en overdrive boven −10 dBm modemuitgang. Symbol rate = data rate / bandbreedte-efficiëntie, bezette bandbreedte met roll-off 0,35. Het grondstation kan in CW (ongemoduleerd) zenden: een zuivere draaggolf zonder data, die op de spectrum analyzer als smalle lijn verschijnt. Data rate, modulatie en FEC doen dan niet mee en geen demod lockt. De CCT200 start altijd in CW: CW → Confirm zet een draaggolf aan, Modulate → Confirm schakelt over op data, Abort stopt het zenden. Reset zet de sim-standaardwaarden (Tx mode normaal, carrier uit, −25 dBm). Multiplayer: elke operator stuurt alleen de instellingen van zijn eigen modem, en beide schermen rekenen daarmee dezelfde link door. Het grondstation kiest de transponder. Valt de verbinding weg, dan stopt de carrier van de andere kant. De koppeling loopt via de Ably-relay over gewoon HTTPS, zodat hij ook werkt in getunnelde werkomgevingen; de berichten zijn versleuteld met een sleutel die uit sessienaam en wachtwoord wordt afgeleid. Handmatig koppelen met codes maakt een directe WebRTC-verbinding en werkt alleen waar WebRTC aanstaat. Weer: elke locatie heeft een eigen weer (helder, bewolkt, motregen, regen, zware regen of onweersbui). Regen dempt de uplink vanaf die locatie (Ku 14 GHz) volledig en de downlink naar die locatie voor 75 %, plus de extra ruis die de natte atmosfeer in de ontvanger brengt; bij zware regen en onweer schommelt de demping. Zonder handmatige keuze verandert het weer per locatie willekeurig om de twee à vijf minuten, en af en toe trekt er een ruimtestorm over die beide richtingen met scintillatie en korte drop-outs treft. Die stormeffecten zijn voor de oefening aangezet: op Ku-band naar een geostationaire satelliet zijn ze in werkelijkheid meestal klein. Het grondstation bepaalt het weer en geeft het door aan de CCT200.</p></details>
 </div>
 
 <dialog class="mp" id="mp" aria-labelledby="mpTitle">
   <div class="mpin">
     <section id="stRole" class="mpsec">
       <h2 id="mpTitle">Zendweg <span>Multiplayer</span></h2>
-      <p>Eén speler bedient het grondstation, de ander de CCT200 in het veld. Jullie kiezen samen een sessienaam, eventueel met wachtwoord, en vullen die allebei in. De koppeling loopt over gewoon HTTPS en is versleuteld met het wachtwoord.</p>
+      <p>Eén operator bedient het grondstation, de ander de CCT200 in het veld. Jullie kiezen samen een sessienaam, eventueel met wachtwoord, en vullen die allebei in. De koppeling loopt over gewoon HTTPS en is versleuteld met het wachtwoord.</p>
       <div class="roles">
         <button class="role" type="button" data-role="as"><b><i class="tag" style="background:var(--out)"></i>Grondstation</b><span>DMD2050E, spectrum analyzer en de keuze van de transponder.</span></button>
         <button class="role" type="button" data-role="cct"><b><i class="tag" style="background:var(--in)"></i>CCT200</b><span>De veldterminal in het veld: CW, Modulate, Abort.</span></button>
@@ -253,7 +238,7 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
 
     <section id="stSess" class="mpsec" hidden>
       <h2 id="sTitle">Sessie</h2>
-      <p>Spreek samen een sessienaam af, bijvoorbeeld <b class="mono">LES-3A</b>, en eventueel een wachtwoord. Beide spelers vullen precies hetzelfde in. Hoofdletters maken niet uit.</p>
+      <p>Spreek samen een sessienaam af, bijvoorbeeld <b class="mono">LES-3A</b>, en eventueel een wachtwoord. Beide operators vullen precies hetzelfde in. Hoofdletters maken niet uit.</p>
       <div class="step">
         <div class="fgrid">
           <label class="f" for="sName"><span class="fl">Sessienaam</span><span class="inp"><input id="sName" autocomplete="off" spellcheck="false" placeholder="LES-3A" maxlength="40"></span></label>
@@ -272,7 +257,7 @@ dialog.mp::backdrop{background:rgba(4,8,10,.78)}
         <span class="fl">1 · Sessiecode voor de CCT200</span>
         <div class="row"><button class="btn go" id="hMake" type="button">Maak sessiecode</button><span class="small" id="hLen"></span></div>
         <textarea class="code" id="hOffer" readonly placeholder="De sessiecode verschijnt hier." aria-label="Sessiecode"></textarea>
-        <div class="row"><button class="btn" id="hCopy" type="button" disabled>Kopieer sessiecode</button><span class="small">Stuur deze code naar de CCT200-speler.</span></div>
+        <div class="row"><button class="btn" id="hCopy" type="button" disabled>Kopieer sessiecode</button><span class="small">Stuur deze code naar de CCT200-operator.</span></div>
       </div>
       <div class="step">
         <span class="fl">2 · Antwoordcode van de CCT200</span>
@@ -914,7 +899,7 @@ function drawWx(t){const ts=t/1000;
 }
 
 /* ================= MULTIPLAYER (handmatig koppelen, WebRTC) ================= */
-const MP_VER='1.3';
+const MP_VER='1.4';
 const ABLY_KEY='Rk0XpA.odnQFw:c5cSSJfvdcerMJHc4yLP5JptRDgTPOr6me6MLVc1Nms'; /* alleen publish/subscribe/presence op zwmp:* */
 const FECALL=Object.entries(FECS).flatMap(([g,rs])=>rs.map(r=>g+' '+r));
 const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'}]};
@@ -998,7 +983,7 @@ function newPeer(){closePeer();pc=new RTCPeerConnection(ICE);
   return pc;}
 function wire(ch){dc=ch;
   ch.onopen=()=>{lastSeen=performance.now();lastSent='';send({t:'hello',role:ROLE,ver:MP_VER});sendState(true);setConn('on');};
-  ch.onclose=()=>{if(conn==='on'||conn==='stil')lost('De verbinding met de andere speler is verbroken.');};
+  ch.onclose=()=>{if(conn==='on'||conn==='stil')lost('De verbinding met de andere operator is verbroken.');};
   ch.onmessage=e=>{if(typeof e.data!=='string'||e.data.length>8000)return;let m;try{m=JSON.parse(e.data)}catch(x){return}
     handleMsg(m);};}
 function handleMsg(m){if(!m||typeof m!=='object')return;lastSeen=performance.now();if(conn==='stil'&&MODE==='p2p')setConn('on');
@@ -1008,7 +993,7 @@ function handleMsg(m){if(!m||typeof m!=='object')return;lastSeen=performance.now
       if(other()==='as'&&typeof m.tp==='string'&&Object.prototype.hasOwnProperty.call(TP,m.tp)){S.tp=m.tp;$('tp').value=m.tp;}
       if(other()==='as'){const w=cleanWx(m.wx);if(w)S.wx=w;}
       fill(other());update();applying=false;}
-    else if(m.t==='bye'&&MODE==='p2p'){lost('De andere speler heeft de verbinding verbroken.');closePeer();}}
+    else if(m.t==='bye'&&MODE==='p2p'){lost('De andere operator heeft de verbinding verbroken.');closePeer();}}
 const linkUp=()=>MODE==='ably'?!!(ach&&ably&&ably.connection.state==='connected'):!!(dc&&dc.readyState==='open');
 function send(o){if(MODE==='ably'){if(linkUp())ach.publish('m',o).catch(()=>{});}
   else if(dc&&dc.readyState==='open')try{dc.send(JSON.stringify(o))}catch(e){}}
@@ -1018,7 +1003,7 @@ function sendState(force){if(ROLE==='solo'||!linkUp())return;
   if(MODE==='ably'&&!force){clearTimeout(sendT);sendT=setTimeout(()=>sendState(true),150);return;} /* bundelt snelle klikken */
   lastSent=j;send(msg);}
 function lost(txt){if(ROLE!=='solo'){S[other()].tx.on=false;applying=true;update();applying=false;}setConn('lost',txt);}
-setInterval(()=>{if(MODE==='p2p'&&(conn==='on'||conn==='stil')){sendState(true);const q=performance.now()-lastSeen;if(q>15000)lost('Al 15 seconden niets gehoord van de andere speler. Zijn carrier is uit; koppel opnieuw.');else if(q>7000&&conn==='on')setConn('stil','Al een paar seconden niets gehoord van de andere speler.');}},2000);
+setInterval(()=>{if(MODE==='p2p'&&(conn==='on'||conn==='stil')){sendState(true);const q=performance.now()-lastSeen;if(q>15000)lost('Al 15 seconden niets gehoord van de andere operator. Zijn carrier is uit; koppel opnieuw.');else if(q>7000&&conn==='on')setConn('stil','Al een paar seconden niets gehoord van de andere operator.');}},2000);
 
 /* --- relay via Ably: werkt over gewoon HTTPS, ook in getunnelde werkomgevingen --- */
 function loadAbly(){if(window.Ably)return Promise.resolve();
@@ -1065,10 +1050,10 @@ function renderMp(){document.body.classList.toggle('role-as',ROLE==='as');docume
   $('tp').disabled=ROLE==='cct';$('tp').title=ROLE==='cct'?'Het grondstation kiest de transponder.':'';
   if(ROLE!=='solo'){const o=other();$('peerName').innerHTML=`<span class="tag" style="background:${o==='as'?'var(--out)':'var(--in)'};width:10px;height:10px;display:inline-block;border-radius:2px;margin-right:8px"></span>${NAME[o]}`;
     $('peerSt').textContent=PILL[conn][0];$('peerSt').style.color=conn==='on'?'var(--ok)':conn==='lost'?'var(--bad)':conn==='idle'?'var(--muted)':'var(--trace)';
-    $('peerTxt').textContent=(connNote?connNote+' ':'')+(conn==='on'||conn==='stil'?`Deze kant wordt bediend door de andere speler. Wat er daar is ingesteld, zie je alleen terug in de zendweg${ROLE==='as'?' en op de spectrum analyzer':''}.`
-      :`Koppel met de ${NAME[o]}-speler om samen een link op te bouwen. Zonder koppeling zendt de ${NAME[o]} niet.`);
+    $('peerTxt').textContent=(connNote?connNote+' ':'')+(conn==='on'||conn==='stil'?`Deze kant wordt bediend door de andere operator. Wat er daar is ingesteld, zie je alleen terug in de zendweg${ROLE==='as'?' en op de spectrum analyzer':''}.`
+      :`Koppel met de ${NAME[o]}-operator om samen een link op te bouwen. Zonder koppeling zendt de ${NAME[o]} niet.`);
     $('peerOpen').textContent=conn==='on'||conn==='stil'?'Verbinding':'Koppelen';}
-  $('onTxt').textContent=ROLE==='solo'?'':`${MODE==='ably'?`Sessie ${sessName}. `:''}Je bent gekoppeld als ${NAME[ROLE]}. De ${NAME[other()]} wordt bediend door de andere speler.${ROLE==='as'?' Jij kiest de transponder.':' Het grondstation kiest de transponder.'}`;}
+  $('onTxt').textContent=ROLE==='solo'?'':`${MODE==='ably'?`Sessie ${sessName}. `:''}Je bent gekoppeld als ${NAME[ROLE]}. De ${NAME[other()]} wordt bediend door de andere operator.${ROLE==='as'?' Jij kiest de transponder.':' Het grondstation kiest de transponder.'}`;}
 function show(id){for(const s of document.querySelectorAll('.mpsec'))s.hidden=s.id!==id;}
 function st(id,txt,cls=''){const el=$(id);el.textContent=txt;el.className='mpst '+cls;}
 function openMp(){if(conn==='on'||conn==='stil')show('stOn');else show(ROLE==='solo'?'stRole':MODE==='p2p'?(ROLE==='as'?'stHost':'stJoin'):'stSess');if(!$('mp').open)$('mp').showModal();}
@@ -1128,38 +1113,17 @@ $('jMake').onclick=async()=>{ablyClose();MODE='p2p';$('jMake').disabled=true;
 $('jCopy').onclick=()=>copy($('jCopy'),$('jAnswer'));
 window.addEventListener('pagehide',()=>{if(MODE==='p2p')send({t:'bye'});else ablyClose();});
 
-/* elke lokale wijziging gaat als volledige status naar de andere speler */
+/* elke lokale wijziging gaat als volledige status naar de andere operator */
 const _update=update;
 /* sluit een tabblad netjes af: de ander krijgt 'bye' */
 update=function(){_update();renderWx();if(!applying)sendState(false);};
 renderMp();
-setTimeout(()=>{if(!$('mp').open&&location.hash!=='#rflab'){show('stRole');$('mp').showModal();}},0);
+setTimeout(()=>{if(!$('mp').open){show('stRole');$('mp').showModal();}},0);
 
 fill('as');fill('cct');update();
 let lastSpec=0;
 function frame(now){if(!paused)tFrozen=now;draw(tFrozen);if(now-lastSpec>120&&!paused){lastSpec=now;drawSA();}requestAnimationFrame(frame);}
 document.fonts&&document.fonts.load('16px "Share Tech Mono"').catch(()=>{});
 requestAnimationFrame(frame);
-})();
-</script>
-<script>
-/* Onderdeelkeuze: Zendweg Multiplayer of RF Lab. RF Lab draait in een iframe, zodat de zendweg (en een lopende koppeling) blijft doorlopen. */
-(function(){
-  const sw=document.querySelector(".appsw"),frame=document.getElementById("rfFrame"),hdr=document.querySelector(".app>header");
-  const TITLES={zw:"Zendweg Multiplayer",rf:"RF Lab"};
-  function setHdr(){const r=hdr.getBoundingClientRect();document.documentElement.style.setProperty("--hdr",Math.ceil(r.bottom+10)+"px");}
-  function show(app,push){
-    if(!TITLES[app])app="zw";
-    sw.querySelectorAll("button").forEach(b=>{if(b.dataset.app===app)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
-    document.body.classList.toggle("rf",app==="rf");
-    if(app==="rf"&&!frame.getAttribute("src"))frame.setAttribute("src","rflab.html");
-    document.title=TITLES[app];
-    if(push){try{history.replaceState(null,"",app==="rf"?"#rflab":location.pathname+location.search);}catch(e){}}
-    requestAnimationFrame(()=>{setHdr();window.dispatchEvent(new Event("resize"));});
-  }
-  sw.addEventListener("click",e=>{const b=e.target.closest("button[data-app]");if(b)show(b.dataset.app,true);});
-  window.addEventListener("resize",setHdr);
-  window.addEventListener("hashchange",()=>show(location.hash==="#rflab"?"rf":"zw",false));
-  show(location.hash==="#rflab"?"rf":"zw",false);
 })();
 </script>
